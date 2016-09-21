@@ -1,11 +1,13 @@
 /**
  * Created by frederickmacgregor on 20/09/2016.
  */
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
 var express     = require('express');
 var app         = express();
 var bodyParser  = require('body-parser');
 var morgan      = require('morgan');
-var mongoose    = require('mongoose');
+var db    = require('./config/mongoose.js');
 var passport	= require('passport');
 var config      = require('./config/database'); // get db config file
 var User        = require('./app/models/user.server.model'); // get the mongoose model
@@ -28,8 +30,6 @@ app.get('/', function(req, res) {
     res.send('Hello! The API is at http://localhost:' + port + '/api');
 });
 
-// connect to database
-mongoose.connect(config.database);
 
 // pass passport for configuration
 require('./config/passport')(passport);
