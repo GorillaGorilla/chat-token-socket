@@ -18,6 +18,7 @@ exports.signup = function(req, res, next){
         // save the user
         newUser.save(function(err) {
             if (err) {
+                console.log("mongo save err", err);
                 return res.json({success: false, msg: 'Username already exists.'});
             }
             res.json({success: true, msg: 'Successful created new user.'});
@@ -27,22 +28,29 @@ exports.signup = function(req, res, next){
 
 
 exports.authenticate = function(req, res) {
+    console.log("authenticate called");
+    console.log(req.body);
     User.findOne({
         name: req.body.name
     }, function(err, user) {
         if (err) throw err;
 
         if (!user) {
+            console.log("no user");
             res.send({success: false, msg: 'Authentication failed. User not found.'});
         } else {
+            console.log("user found checking password");
             // check if password matches
             user.comparePassword(req.body.password, function (err, isMatch) {
                 if (isMatch && !err) {
+                    console.log("creating token");
                     // if user is found and password is right create a token
                     var token = jwt.encode(user, config.secret);
                     // return the information including token as JSON
                     res.json({success: true, token: 'JWT ' + token});
                 } else {
+
+                    console.log("compare password err: ", err);
                     res.send({success: false, msg: 'Authentication failed. Wrong password.'});
                 }
             });
