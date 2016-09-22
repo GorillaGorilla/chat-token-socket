@@ -2,7 +2,9 @@
  * Created by frederickmacgregor on 21/09/2016.
  */
 var User = require('mongoose').model('User'),
-    passport = require('passport');
+    passport = require('passport'),
+    jwt         = require('jwt-simple'),
+    config = require("../../config/config.js");
 
 
 
@@ -45,7 +47,7 @@ exports.authenticate = function(req, res) {
                 if (isMatch && !err) {
                     console.log("creating token");
                     // if user is found and password is right create a token
-                    var token = jwt.encode(user, config.secret);
+                    var token = jwt.encode(user, config.sessionSecret);
                     // return the information including token as JSON
                     res.json({success: true, token: 'JWT ' + token});
                 } else {

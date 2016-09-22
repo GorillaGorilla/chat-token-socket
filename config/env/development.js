@@ -3,7 +3,7 @@
  */
 module.exports = {
     // Development configuration options
-    db: 'mongodb://localhost/emergency-response',
+    db: 'mongodb://localhost/token-template',
     sessionSecret: 'developmentSessionSecret'
 };
 
