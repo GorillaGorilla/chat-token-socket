@@ -63,6 +63,7 @@ exports.authenticate = function(req, res) {
 exports.memberInfo = function(req, res) {
     console.log("members info called", req.headers);
     var token = getToken(req.headers);
+    console.log("memberInfo token: ", token);
     if (token) {
         var decoded = jwt.decode(token, config.secret);
         User.findOne({

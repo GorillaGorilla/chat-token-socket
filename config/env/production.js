@@ -11,7 +11,6 @@ if (mongo) {
         mongo = env['mongodb'][0]['credentials'];
         if (mongo.url) {
             conn_str = mongo.url;
-            console.log("conn_str: " + conn_str);
         }
     }
 }else{
