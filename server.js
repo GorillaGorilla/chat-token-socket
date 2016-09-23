@@ -9,7 +9,6 @@ var bodyParser  = require('body-parser');
 var morgan      = require('morgan');
 var db          = require('./config/mongoose.js')();
 var passport	= require('passport');
-var config      = require('./config/database'); // get db config file
 var User        = require('./app/models/user.server.model'); // get the mongoose model
 var port        = process.env.PORT || 8080;
 var jwt         = require('jwt-simple'),
@@ -44,7 +43,11 @@ app.get('/', function(req, res) {
 
 // pass passport for configuration
 require('./config/passport')(passport);
+
+
 app.use(allowCrossDomain);
+
+
 // bundle our routes
 var apiRoutes = express.Router();
 
