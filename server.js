@@ -16,7 +16,17 @@ var jwt         = require('jwt-simple'),
     cfenv = require('cfenv'),
     controller = require("./app/routes/auth.server.controller.js");
 
-// get our request parameters
+
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'example.com');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+};
+
+
+// get our request parameters7
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -34,7 +44,7 @@ app.get('/', function(req, res) {
 
 // pass passport for configuration
 require('./config/passport')(passport);
-
+app.use(allowCrossDomain);
 // bundle our routes
 var apiRoutes = express.Router();
 
@@ -57,4 +67,3 @@ var appEnv = cfenv.getAppEnv();
 app.listen(appEnv.port);
 console.log('Server running at port: ' + appEnv.port);
 module.exports = app;
-
