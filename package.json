@@ -9,7 +9,7 @@
     "mongoose": "~4.2.4",
     "morgan": "~1.5.0",
     "passport": "^0.3.0",
-    "passport-jwt": "^1.2.1",
+    "passport-jwt": "^2.1.0",
     "cfenv": "https://registry.npmjs.org/cfenv/-/cfenv-1.0.0.tgz"
   }
 }

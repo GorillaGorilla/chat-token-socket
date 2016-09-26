@@ -9,11 +9,12 @@ var bodyParser  = require('body-parser');
 var morgan      = require('morgan');
 var db          = require('./config/mongoose.js')();
 var passport	= require('passport');
-var User        = require('./app/models/user.server.model'); // get the mongoose model
+var Responder        = require('./app/models/responder.server.model.js'); // get the mongoose model
 var port        = process.env.PORT || 8080;
 var jwt         = require('jwt-simple'),
     cfenv = require('cfenv'),
-    controller = require("./app/routes/auth.server.controller.js");
+    controller = require("./app/routes/auth.server.controller.js"),
+    users = require("./app/routes/users.server.controller");
 
 
 var allowCrossDomain = function(req, res, next) {
@@ -59,7 +60,9 @@ apiRoutes.post('/authenticate', controller.authenticate);
 
 // route to a restricted info (GET http://localhost:8080/api/memberinfo)
 apiRoutes.get('/memberinfo', passport.authenticate('jwt', { session: false}), controller.memberInfo);
-
+apiRoutes.get('/users/:recordId', passport.authenticate('jwt', { session: false}), users.read);
+apiRoutes.param('recordId', users.recordByID);
+//app.param('friendId', users.friendByID);
 
 
 // connect the api routes under /api/*

@@ -1,7 +1,7 @@
 /**
  * Created by frederickmacgregor on 21/09/2016.
  */
-var User = require('mongoose').model('User'),
+var Responder = require('mongoose').model('Responder'),
     passport = require('passport'),
     jwt         = require('jwt-simple'),
     config = require("../../config/config.js");
@@ -13,7 +13,7 @@ exports.signup = function(req, res, next){
     if (!req.body.name || !req.body.password) {
         res.json({success: false, msg: 'Please pass name and password.'});
     } else {
-        var newUser = new User({
+        var newUser = new Responder({
             name: req.body.name,
             password: req.body.password
         });
@@ -32,14 +32,14 @@ exports.signup = function(req, res, next){
 exports.authenticate = function(req, res) {
     console.log("authenticate called");
     console.log(req.body);
-    User.findOne({
+    Responder.findOne({
         name: req.body.name
     }, function(err, user) {
         if (err) throw err;
 
         if (!user) {
             console.log("no user");
-            res.send({success: false, msg: 'Authentication failed. User not found.'});
+            res.send({success: false, msg: 'Authentication failed. Responder not found.'});
         } else {
             console.log("user found checking password");
             // check if password matches
@@ -63,18 +63,19 @@ exports.authenticate = function(req, res) {
 exports.memberInfo = function(req, res) {
     console.log("members info called", req.headers);
     var token = getToken(req.headers);
+    token = new Buffer(token, "utf-8");
     console.log("memberInfo token: ", token);
     if (token) {
-        var decoded = jwt.decode(token, config.secret);
-        User.findOne({
+        var decoded = jwt.decode(token, config.sessionSecret);
+        Responder.findOne({
             name: decoded.name
         }, function(err, user) {
             if (err) {
-                console.log("User.findone error", err);
+                console.log("Responder.findone error", err);
                 throw err;
             }
             if (!user) {
-                return res.status(403).send({success: false, msg: 'Authentication failed. User not found.'});
+                return res.status(403).send({success: false, msg: 'Authentication failed. Responder not found.'});
             } else {
                 res.json({success: true, msg: 'Welcome in the member area ' + user.name + '!'});
             }

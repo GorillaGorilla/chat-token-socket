@@ -3,6 +3,5 @@
  */
 module.exports = {
     db: 'mongodb://localhost/token-auth-test',
-    sessionSecret: 'Your Application Session Secret',
-    viewEngine: 'ejs'
+    sessionSecret: 'Your Application Session Secret'
 };

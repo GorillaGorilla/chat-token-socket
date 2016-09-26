@@ -1,52 +1,105 @@
 /**
- * Created by frederickmacgregor on 20/09/2016.
+ * Created by Frederick on 24/03/2016.
  */
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+var mongoose = require('mongoose'),
+    crypto = require('crypto'),
+    Schema = mongoose.Schema;
 
-// Thanks to http://blog.matoski.com/articles/jwt-express-node-mongoose/
-
-// set up a mongoose model
 var UserSchema = new Schema({
-    name: {
+    firstName: String,
+    lastName: String,
+    //friends: [{
+    //    person: {type: Schema.ObjectID, ref: User},
+    //    status: {type: String,
+    //    default: 'Pending'}
+    //}],
+    email: {
+        type: String,
+        match: [/.+\@.+\..+/, "Please fill a valid e-mail address"]
+    },
+    username: {
         type: String,
         unique: true,
-        required: true
+        required: 'Username is required',
+        trim: true
     },
     password: {
         type: String,
-        required: true
+        validate: [
+            function(password) {
+                return password && password.length > 6;
+            }, 'Password should be longer'
+        ]
+    },
+    salt: {
+        type: String
+    },
+    provider: {
+        type: String,
+        required: 'Provider is required'
+    },
+    providerId: String,
+    providerData: {},
+    created: {
+        type: Date,
+        default: Date.now
+    },
+    lastLogin: {
+        type: Date,
+        default : Date.now
+    },
+    regNumber:{
+        type: String,
+        unique: true,
+        required: 'You must provide your valid, personal registration number.'
+    },
+    knownIssues: String,
+    healthIssues: String
+});
+UserSchema.add({friends: [{ type : Schema.ObjectId, ref: 'User' }]});
+UserSchema.add({pendingFriends: [{ type : Schema.ObjectId, ref: 'User' }]});
+
+UserSchema.virtual('fullName').get(function() {
+    return this.firstName + ' ' + this.lastName;
+}).set(function(fullName) {
+    var splitName = fullName.split(' ');
+    this.firstName = splitName[0] || '';
+    this.lastName = splitName[1] || '';
+});
+UserSchema.pre('save', function(next) {
+    if (this.password) {
+        this.salt = new Buffer(crypto.randomBytes(16).toString('base64'), 'base64');
+        this.password = this.hashPassword(this.password);
     }
+    next();
 });
 
-UserSchema.pre('save', function (next) {
-    var user = this;
-    if (this.isModified('password') || this.isNew) {
-        bcrypt.genSalt(10, function (err, salt) {
-            if (err) {
-                return next(err);
+UserSchema.methods.hashPassword = function(password) {
+    return crypto.pbkdf2Sync(password, this.salt, 10000,64).toString('base64');
+};
+UserSchema.methods.authenticate = function(password) {
+    return this.password === this.hashPassword(password);
+};
+UserSchema.statics.findUniqueUsername = function(username, suffix, callback) {
+    var _this = this;
+    var possibleUsername = username + (suffix || '');
+    _this.findOne({
+        username: possibleUsername
+    }, function(err, user) {
+        if (!err) {
+            if (!user) {
+                callback(possibleUsername);
+            } else {
+                return _this.findUniqueUsername(username, (suffix || 0) +
+                    1, callback);
             }
-            bcrypt.hash(user.password, salt, function (err, hash) {
-                if (err) {
-                    return next(err);
-                }
-                user.password = hash;
-                next();
-            });
-        });
-    } else {
-        return next();
-    }
-});
-
-UserSchema.methods.comparePassword = function (passw, cb) {
-    bcrypt.compare(passw, this.password, function (err, isMatch) {
-        if (err) {
-            return cb(err);
+        } else {
+            callback(null);
         }
-        cb(null, isMatch);
     });
 };
-
-module.exports = mongoose.model('User', UserSchema);
+UserSchema.set('toJSON', {
+    getters: true,
+    virtuals: true
+});
+mongoose.model('User', UserSchema);
