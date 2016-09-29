@@ -7,7 +7,7 @@ var User = require('mongoose').model('User'),
 
 
 exports.read = function(req, res){
-    console.log("read called");
+    console.log("read called", req.record);
     res.json(req.record);
 };
 
@@ -21,6 +21,7 @@ exports.recordByID = function (req, res, next, id) {
     //console.log("userBy Id req.targetedUser " + req.targetedUser);
     User.findOne({regNumber: id}, function(err,user){
         if (err) {
+            console.log("err", err);
             return res.send(err);
         }else {
             req.record = user;
