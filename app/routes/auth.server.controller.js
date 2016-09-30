@@ -1,6 +1,7 @@
 /**
  * Created by frederickmacgregor on 21/09/2016.
  */
+"use strict";
 var Responder = require('mongoose').model('Responder'),
     passport = require('passport'),
     jwt         = require('jwt-simple'),
@@ -60,40 +61,42 @@ exports.authenticate = function(req, res) {
     });
 };
 
-exports.memberInfo = function(req, res) {
-    console.log("members info called", req.headers);
-    var token = getToken(req.headers);
-    token = new Buffer(token, "utf-8");
-    console.log("memberInfo token: ", token);
-    if (token) {
-        var decoded = jwt.decode(token, config.sessionSecret);
-        Responder.findOne({
-            name: decoded.name
-        }, function(err, user) {
-            if (err) {
-                console.log("Responder.findone error", err);
-                throw err;
-            }
-            if (!user) {
-                return res.status(403).send({success: false, msg: 'Authentication failed. Responder not found.'});
-            } else {
-                res.json({success: true, msg: 'Welcome in the member area ' + user.name + '!'});
-            }
-        });
-    } else {
-        return res.status(403).send({success: false, msg: 'No token provided.'});
-    }
-};
 
-function getToken (headers) {
-    if (headers && headers.authorization) {
-        var parted = headers.authorization.split(' ');
-        if (parted.length === 2) {
-            return parted[1];
-        } else {
-            return null;
-        }
-    } else {
-        return null;
-    }
-};
+// Demo route, unused.
+// exports.memberInfo = function(req, res) {
+//     console.log("members info called", req.headers);
+//     var token = getToken(req.headers);
+//     token = new Buffer(token, "utf-8");
+//     console.log("memberInfo token: ", token);
+//     if (token) {
+//         var decoded = jwt.decode(token, config.sessionSecret);
+//         Responder.findOne({
+//             name: decoded.name
+//         }, function(err, user) {
+//             if (err) {
+//                 console.log("Responder.findone error", err);
+//                 throw err;
+//             }
+//             if (!user) {
+//                 return res.status(403).send({success: false, msg: 'Authentication failed. Responder not found.'});
+//             } else {
+//                 res.json({success: true, msg: 'Welcome in the member area ' + user.name + '!'});
+//             }
+//         });
+//     } else {
+//         return res.status(403).send({success: false, msg: 'No token provided.'});
+//     }
+// };
+
+// function getToken (headers) {
+//     if (headers && headers.authorization) {
+//         var parted = headers.authorization.split(' ');
+//         if (parted.length === 2) {
+//             return parted[1];
+//         } else {
+//             return null;
+//         }
+//     } else {
+//         return null;
+//     }
+// };

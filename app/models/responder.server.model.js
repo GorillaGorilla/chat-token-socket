@@ -8,7 +8,7 @@ var bcrypt = require('bcrypt');
 // Thanks to http://blog.matoski.com/articles/jwt-express-node-mongoose/
 
 // set up a mongoose model
-var UserSchema = new Schema({
+var ResponderSchema = new Schema({
     name: {
         type: String,
         unique: true,
@@ -20,7 +20,7 @@ var UserSchema = new Schema({
     }
 });
 
-UserSchema.pre('save', function (next) {
+ResponderSchema.pre('save', function (next) {
     var user = this;
     if (this.isModified('password') || this.isNew) {
         bcrypt.genSalt(10, function (err, salt) {
@@ -40,7 +40,7 @@ UserSchema.pre('save', function (next) {
     }
 });
 
-UserSchema.methods.comparePassword = function (passw, cb) {
+ResponderSchema.methods.comparePassword = function (passw, cb) {
     bcrypt.compare(passw, this.password, function (err, isMatch) {
         if (err) {
             return cb(err);
@@ -49,4 +49,4 @@ UserSchema.methods.comparePassword = function (passw, cb) {
     });
 };
 
-module.exports = mongoose.model('Responder', UserSchema);
+module.exports = mongoose.model('Responder', ResponderSchema);

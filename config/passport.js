@@ -1,6 +1,7 @@
 /**
  * Created by frederickmacgregor on 20/09/2016.
  */
+"use strict";
 var JwtStrategy = require('passport-jwt').Strategy,
     ExtractJwt = require('passport-jwt').ExtractJwt;
 
@@ -12,7 +13,7 @@ module.exports = function(passport) {
     var opts = {};
     opts.secretOrKey = config.sessionSecret;
     opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
-    console.log("$$$Passport opts: ", opts);
+    // console.log("$$$Passport opts: ", opts);
     passport.use(new JwtStrategy(opts, function(jwt_payload, done) {
         Responder.findOne({id: jwt_payload.id}, function(err, user) {
             if (err) {

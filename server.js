@@ -1,17 +1,17 @@
 /**
  * Created by frederickmacgregor on 20/09/2016.
  */
+"use strict";
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-var express     = require('express');
-var app         = express();
-var bodyParser  = require('body-parser');
-var morgan      = require('morgan');
-var db          = require('./config/mongoose.js')();
-var passport	= require('passport');
-var Responder        = require('./app/models/responder.server.model.js'); // get the mongoose model
-var port        = process.env.PORT || 8080;
-var jwt         = require('jwt-simple'),
+var express     = require('express'),
+    app         = express(),
+    bodyParser  = require('body-parser'),
+    morgan      = require('morgan'),
+    db          = require('./config/mongoose.js')(),
+    passport	= require('passport'),
+    Responder        = require('./app/models/responder.server.model.js'), // get the mongoose model
+    jwt         = require('jwt-simple'),
     cfenv = require('cfenv'),
     controller = require("./app/routes/auth.server.controller.js"),
     users = require("./app/routes/users.server.controller");
@@ -36,11 +36,6 @@ app.use(morgan('dev'));
 // Use the passport package in our application
 app.use(passport.initialize());
 
-// demo Route (GET http://localhost:8080)
-app.get('/', function(req, res) {
-    res.send('Hello! The API is at http://localhost:' + port + '/api');
-});
-
 
 // pass passport for configuration
 require('./config/passport')(passport);
@@ -58,15 +53,18 @@ apiRoutes.post('/signup', controller.signup);
 // route to authenticate a user (POST http://localhost:8080/api/authenticate)
 apiRoutes.post('/authenticate', controller.authenticate);
 
-// route to a restricted info (GET http://localhost:8080/api/memberinfo)
-apiRoutes.get('/memberinfo', passport.authenticate('jwt', { session: false}), controller.memberInfo);
+// apiRoutes.get('/memberinfo', passport.authenticate('jwt', { session: false}), controller.memberInfo);
 apiRoutes.get('/users/:recordId', passport.authenticate('jwt', { session: false}), users.read);
 apiRoutes.param('recordId', users.recordByID);
-//app.param('friendId', users.friendByID);
-
 
 // connect the api routes under /api/*
 app.use('/api', apiRoutes);
+
+// demo Route (GET http://localhost:8080)
+app.get('/', function(req, res) {
+    res.send('Hello! This a is a server with token authentication');
+});
+
 
 var appEnv = cfenv.getAppEnv();
 

@@ -1,6 +1,7 @@
 /**
  * Created by GB115151 on 04/06/2016.
  */
+"use strict";
 
 var mongo = process.env.VCAP_SERVICES;
 var port = process.env.PORT || 3030;
