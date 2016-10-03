@@ -10,11 +10,11 @@ var express     = require('express'),
     morgan      = require('morgan'),
     db          = require('./config/mongoose.js')(),
     passport	= require('passport'),
-    Responder        = require('./app/models/responder.server.model.js'), // get the mongoose model
     jwt         = require('jwt-simple'),
     cfenv = require('cfenv'),
     controller = require("./app/routes/auth.server.controller.js"),
-    users = require("./app/routes/users.server.controller");
+    users = require("./app/routes/users.server.controller"),
+    survey = require("./app/routes/survey.server.controller");
 
 
 var allowCrossDomain = function(req, res, next) {
@@ -52,7 +52,7 @@ apiRoutes.post('/signup', controller.signup);
 
 // route to authenticate a user (POST http://localhost:8080/api/authenticate)
 apiRoutes.post('/authenticate', controller.authenticate);
-
+apiRoutes.post('/submitsurvey', passport.authenticate('jwt', { session: false}), survey.create);
 // apiRoutes.get('/memberinfo', passport.authenticate('jwt', { session: false}), controller.memberInfo);
 apiRoutes.get('/users/:recordId', passport.authenticate('jwt', { session: false}), users.read);
 apiRoutes.param('recordId', users.recordByID);
