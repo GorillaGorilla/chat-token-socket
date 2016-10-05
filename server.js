@@ -53,6 +53,7 @@ apiRoutes.post('/signup', controller.signup);
 // route to authenticate a user (POST http://localhost:8080/api/authenticate)
 apiRoutes.post('/authenticate', controller.authenticate);
 apiRoutes.post('/logsurvey', passport.authenticate('jwt', { session: false}), survey.create);
+apiRoutes.get('/listsurveys', survey.list);
 // apiRoutes.get('/memberinfo', passport.authenticate('jwt', { session: false}), controller.memberInfo);
 apiRoutes.get('/users/:recordId', passport.authenticate('jwt', { session: false}), users.read);
 apiRoutes.param('recordId', users.recordByID);
