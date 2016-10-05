@@ -7,17 +7,18 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var UserSchema = new Schema({
-    firstName: String,
-    lastName: String,
+    name: String,
     //friends: [{
     //    person: {type: Schema.ObjectID, ref: User},
     //    status: {type: String,
     //    default: 'Pending'}
     //}],
+    subjectName: String,
     email: {
         type: String,
         match: [/.+\@.+\..+/, "Please fill a valid e-mail address"]
     },
+    phone : Number,
     username: {
         type: String,
         unique: true,
@@ -32,6 +33,10 @@ var UserSchema = new Schema({
             }, 'Password should be longer'
         ]
     },
+    address1: String,
+    address2: String,
+    address3: String,
+    address4: String,
     salt: {
         type: String
     },
