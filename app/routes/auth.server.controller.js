@@ -36,7 +36,12 @@ exports.authenticate = function(req, res) {
     Responder.findOne({
         name: req.body.name
     }, function(err, user) {
-        if (err) throw err;
+        if (err)
+        {
+            console.log("mongodb query err", err);
+            return res.send(err);
+        }
+
 
         if (!user) {
             console.log("no user");
