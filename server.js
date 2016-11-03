@@ -54,12 +54,10 @@ apiRoutes.param('recordId', users.recordByID);
 app.use('/api', apiRoutes);
 
 // demo Route (GET http://localhost:8080)
-app.get('/', function(req, res) {
-    res.send('Hello! This a is a server with token authentication');
-});
 
 
 io.on('connection', function (socket) {
+    console.log('connection');
     var addedUser = false;
 
     // when the client emits 'new message', this listens and executes
