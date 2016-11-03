@@ -3,7 +3,8 @@
  */
 "use strict";
 var JwtStrategy = require('passport-jwt').Strategy,
-    ExtractJwt = require('passport-jwt').ExtractJwt;
+    ExtractJwt = require('passport-jwt').ExtractJwt,
+    socketio = require('socket.io');
 
 // load up the user model
 var Responder = require('../app/models/responder.server.model.js');

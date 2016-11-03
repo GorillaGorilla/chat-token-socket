@@ -1,15 +1,16 @@
 {
-  "name": "node-rest-auth",
+  "name": "socket-token",
   "main": "server.js",
   "dependencies": {
     "bcrypt": "^0.8.5",
     "body-parser": "~1.9.2",
+    "cfenv": "https://registry.npmjs.org/cfenv/-/cfenv-1.0.0.tgz",
     "express": "~4.9.8",
     "jwt-simple": "^0.3.1",
     "mongoose": "~4.2.4",
     "morgan": "~1.5.0",
     "passport": "^0.3.0",
     "passport-jwt": "^2.1.0",
-    "cfenv": "https://registry.npmjs.org/cfenv/-/cfenv-1.0.0.tgz"
+    "socket.io": "^1.5.1"
   }
 }
