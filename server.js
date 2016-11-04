@@ -118,6 +118,6 @@ io.on('connection', function (socket) {
 
 var appEnv = cfenv.getAppEnv();
 
-app.listen(appEnv.port);
+server.listen(appEnv.port);
 console.log('Server running at port: ' + appEnv.port);
-module.exports = app;
+module.exports = server;
