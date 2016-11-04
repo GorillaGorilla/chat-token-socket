@@ -55,6 +55,7 @@ app.use('/api', apiRoutes);
 
 // demo Route (GET http://localhost:8080)
 
+var numUsers = 0;
 
 io.on('connection', function (socket) {
     console.log('connection');
