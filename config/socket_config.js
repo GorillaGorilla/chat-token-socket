@@ -48,7 +48,9 @@ module.exports = function(io){
             running = true;
             setInterval(function() {
                 Engine.update(engine, 1000 / 30);
-                socket.emit('gameState',{boxA: boxA.position, boxB: boxB.position});
+                var state = JSON.stringify({boxA: boxA.position, boxB: boxB.position});
+                socket.broadcast.emit('gameState',{username: username, message: state});
+                console.log({username: username, message: state});
             }, 1000 / 2);
         }
 
