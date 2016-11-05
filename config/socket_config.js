@@ -40,17 +40,15 @@ module.exports = function(io){
 
     io.on('connection', function (socket) {
         var addedUser = false;
-        if (!running){
-            run();
-        }
+
 
         function run(){
             running = true;
             setInterval(function() {
                 Engine.update(engine, 1000 / 30);
                 var state = JSON.stringify({boxA: boxA.position, boxB: boxB.position});
-                socket.broadcast.emit('gameState',{username: username, message: state});
-                console.log({username: username, message: state});
+                socket.broadcast.emit('new message',{username: 'game', message: state});
+                console.log({username: 'game', message: state});
             }, 1000 / 2);
         }
 
@@ -79,6 +77,9 @@ module.exports = function(io){
                 username: socket.username,
                 numUsers: numUsers
             });
+            if (!running){
+                run();
+            }
         });
 
         // when the client emits 'typing', we broadcast it to others
