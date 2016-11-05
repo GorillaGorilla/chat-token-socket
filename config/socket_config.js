@@ -6,8 +6,7 @@
 
 var numUsers = 0;
 
-module.exports = function(app, socketio){
-    var io = require('socket.io')(app);
+module.exports = function(io){
 
     io.on('connection', function (socket) {
         var addedUser = false;
