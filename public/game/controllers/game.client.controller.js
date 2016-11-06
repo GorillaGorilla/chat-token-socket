@@ -10,6 +10,7 @@ angular.module('game').controller('GameController', ['$scope', 'Socket',
             Socket.removeListener('gameState');
             Socket.removeListener('chatMessage');
         });
+        Socket.emit('add user', "mr man");
         Socket.on('onconnected',function(response){
             console.log(response);
             $scope.gameId = response.gameId;

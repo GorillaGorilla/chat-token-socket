@@ -3,7 +3,7 @@
  */
 angular.module('game').config(['$routeProvider',
     function($routeProvider) {
-        $routeProvider.when('/game', {
+        $routeProvider.when('/', {
             templateUrl: 'game/views/game.client.view.html'
         })
     }

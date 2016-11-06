@@ -1,13 +1,15 @@
 /**
  * Created by GB115151 on 22/07/2016.
  */
-angular.module('chat').service('Socket', ['Authentication', '$location', '$timeout',
-    function(Authentication, $location, $timeout) {
-        if (Authentication.user) {
-            this.socket = io();
-        } else {
-            $location.path('/');
-        }
+angular.module('chat').service('Socket', ['$location', '$timeout',
+    function($location, $timeout) {
+        // if (Authentication.user) {
+        //    this.socket = io();
+        // } else {
+        //     $location.path('/');
+        // }
+        this.socket = io();
+
         this.on = function(eventName, callback) {
             if (this.socket) {
                 this.socket.on(eventName, function(data) {

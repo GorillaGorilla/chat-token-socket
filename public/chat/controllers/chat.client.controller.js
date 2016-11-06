@@ -5,7 +5,8 @@ angular.module('chat').controller('ChatController', ['$scope',
     'Socket',
     function($scope, Socket) {
         $scope.messages = [];
-        Socket.on('chatMessage', function(message) {
+        Socket.emit('add user', "mr man");
+        Socket.on('new message', function(message) {
             $scope.messages.push(message);
         });
         $scope.sendMessage = function() {
