@@ -91,6 +91,10 @@ var gameFactory = function(){
         run : function() {
             this.running = true;
             console.log("running");
+            for (var playerId in this.players){
+                debug('player', playerId);
+                this.players[playerId].emit('game start', {username: 'game', message : 'game starting'});
+            }
             this.startTime = getNanoTime();
             var t0 = getNanoTime();
             var deltaTime = (1000000);

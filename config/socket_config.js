@@ -16,7 +16,6 @@ var
 
 
 
-var numUsers = 0;
 
 module.exports = function(io){
 

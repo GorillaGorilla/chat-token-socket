@@ -6,6 +6,9 @@ var UUID = require('node-uuid');
 var GameServer = require('./game_server.server.js');
 var debug = require('debug');
 
+
+var numUsers = 0;
+
 module.exports = function(io, client) {
     console.log('game server lobby called');
     var addedUser = false;
@@ -23,6 +26,7 @@ module.exports = function(io, client) {
         client.userId = UUID();
         console.log('add user', client.userId);
         addedUser = true;
+        numUsers ++;
 
         if (GameServer.game_count ===0){
             clientsGame = GameServer.createGame(client);
@@ -40,8 +44,8 @@ module.exports = function(io, client) {
         client.broadcast.emit('user joined', {
             username: client.username
         });
-
-        io.emit('onconnected', { gameId: clientsGame } );
+        console.log('emitting onconnected');
+        client.emit('onconnected', { gameId: clientsGame , numUsers: numUsers, userId : client.userId} );
     });
 
 
