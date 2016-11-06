@@ -54,6 +54,8 @@ apiRoutes.get('/users', passport.authenticate('jwt', { session: false}), functio
 // connect the api routes under /api/*
 app.use('/api', apiRoutes);
 
+app.use(express.static('./public'));
+
 // demo Route (GET http://localhost:8080)
 
 require('./config/socket_config')(io);

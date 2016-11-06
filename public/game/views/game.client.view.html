@@ -1,0 +1,26 @@
+<section data-ng-controller="GameController">
+    <div><button ng-click="up()"> Up</button></div>
+    <div>
+        <button ng-click="left()">Left</button>
+        <button ng-click="right()">Right</button>
+    </div>
+    <div><button ng-click="down()">Down</button></div>
+    <br>
+    <h>{{score}}</h>
+
+    <div data-ng-repeat="message in messages" data-ng-switch="message.type">
+        <strong data-ng-switch-when='status'>
+            <span data-ng-bind="message.created | date:'mediumTime'"></span>
+            <span data-ng-bind="message.username"></span>
+            <span>is</span>
+            <span data-ng-bind="message.text"></span>
+        </strong>
+        <span data-ng-switch-default>
+            <span data-ng-bind="message.created | date:'mediumTime'"></span>
+            <span data-ng-bind="message.username"></span>
+            <span>:</span>
+            <span data-ng-bind="message.text"></span>
+        </span>
+    </div>
+
+</section>

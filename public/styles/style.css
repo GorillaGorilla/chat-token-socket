@@ -1,0 +1,56 @@
+body {
+    font-family: "Cambria";
+    font-size: 20px;
+}
+
+h1 {
+    color: orange;
+    text-align: left;
+}
+
+p {
+    font-family: "Cambria";
+    font-size: 20px;
+}
+
+th, td {
+    padding: 5px 5px;
+    border-bottom: 1px solid #ddd;
+}
+
+.internalCell {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+table {
+
+}
+
+
+
+button {
+    color: #00b3ef;
+}
+
+.nav {
+    background-color : #efefef;
+    border-bottom :1px solid #dbdbdb;
+    border-top :1px solid #dbdbdb;
+}
+
+.nav a {
+    color: #5a5a5a;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 14px 10px;
+    text-transform: uppercase;
+}
+
+.nav li {
+    display: inline;
+}
+
+.notify a {
+    color: #dd310c;
+}

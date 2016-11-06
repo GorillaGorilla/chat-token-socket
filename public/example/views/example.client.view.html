@@ -1,0 +1,25 @@
+<section ng-controller="ExampleController">
+    <div data-ng-show="!authentication.user">
+        <a href="/signup">Signup</a>
+        <a href="/signin">Signin</a>
+    </div>
+    <div data-ng-show="authentication.user">
+
+        <div class="nav" >
+            <ul class="pull-left"><li><a href="#!/">Home</a></li></ul>
+            <ul ng-show="authentication.user" class="pull-right">
+                <li><a href="/#!/users"> User List</a> </li>
+                <li ng-show="authentication.user.pendingFriends.length > 0 || authentication.user.friends.length > 0">
+                    <a href="/#!/friends" ng-class="{notify:[authentication.user.pendingFriends.length > 0]}">Friends</a></li>
+                <li><a href="/signout">Signout</a></li>
+            </ul>
+        </div>
+        <h1>Hello <span data-ng-bind="authentication.user.fullName"></span></h1>
+
+        <h1><a href="/#!/game">Game</a></h1>
+
+
+
+    </div>
+</section>
+
