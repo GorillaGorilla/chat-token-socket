@@ -32,35 +32,46 @@ module.exports = function(io, client) {
             clientsGame = GameServer.createGame(client);
         }else{
             for (var gameId in GameServer.games){
-                if (GameServer.games[gameId].playerCount === 1){
+                if (GameServer.games[gameId].playerCount < 6){
                     GameServer.games[gameId].addPlayer(client);
                     clientsGame = gameId;
                 }
             }
-            clientsGame = GameServer.createGame(client)
+            clientsGame = clientsGame || GameServer.createGame(client) ;
         };
 
-        // echo globally (all clients) that a person has connected
-        client.broadcast.emit('user joined', {
-            username: client.username
-        });
-        console.log('emitting onconnected');
+
+        console.log('emitting onconnected', clientsGame);
         client.emit('onconnected', { gameId: clientsGame , numUsers: numUsers, userId : client.userId} );
     });
 
 
     client.on('gameInputMessage', function(dat){
-        debug(dat);
-        GameServer.games[dat.gameId].inputs[client.userId] = dat;
+        console.log('gameInputMessage',dat);
+        GameServer.games[dat.gameId].inputs.push(dat.input);
+    });
+
+    client.on('location', function(dat){
+        console.log('location event',dat);
+        GameServer.games[dat.gameId].new_locations[dat.location.userId] = dat.location;
     });
 
     client.on('disconnect', function() {
-        debug('userID', client.userId)
+        debug('userID', client.userId);
         for (var gameId in GameServer.games){
             if (GameServer.games[gameId].players[client.userId]){
                 GameServer.games[gameId].removePlayer(client);
                 debug('game found, player removed');
             }
+        }
+        if (addedUser) {
+            --numUsers;
+
+            // echo globally that this client has left
+            client.broadcast.emit('user left', {
+                username: client.username,
+                numUsers: numUsers
+            });
         }
         io.emit('chatMessage', {
             type: 'status',

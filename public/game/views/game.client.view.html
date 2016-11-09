@@ -6,7 +6,13 @@
     </div>
     <div><button ng-click="down()">Down</button></div>
     <br>
+    <div><button ng-click="locationEvent(gameId)">Send location</button></div>
+
+    <div><button ng-click="sendBomber()">Send Bomber</button></div>
+    <br>
     <h>{{score}}</h>
+    <br>
+    <h>{{start}}</h>
 
     <div data-ng-repeat="message in messages" data-ng-switch="message.type">
         <strong data-ng-switch-when='status'>

@@ -3,11 +3,13 @@
  */
 "use strict;"
 var game_server = module.exports = { games : {}, game_count:0 },
+proj = require('./convert_maps'),
 UUID = require('node-uuid'),
 debug = require('debug')('http'),
     Matter = require('matter-js'),
     Engine = Matter.Engine,
-    Bodies = Matter.Bodies;
+    Bodies = Matter.Bodies,
+    Vector = Matter.Vector;
 
 
 
@@ -46,7 +48,7 @@ game_server.createGame = function(player){
     this.games[id] = gameFactory();
     this.game_count ++;
     this.games[id].addPlayer(player);
-    console.log("game: ", this.games[id]);
+    console.log("game players: ", this.games[id].playerCount);
     return id;
 };
 game_server.joinGame = function(player){
@@ -63,7 +65,7 @@ var gameFactory = function(){
 // create an engine
     var engine = Engine.create();
 
-
+    engine.world.gravity.y = 0;
 // create two boxes and a ground
     var boxA = Bodies.rectangle(400, 200, 80, 80);
     var boxB = Bodies.rectangle(450, 50, 80, 80);
@@ -81,19 +83,21 @@ var gameFactory = function(){
         players : {},
         World: World,
         Bodies: Bodies,
-        Engine: Engine,
+        engine: engine,
         // arena : arenaFactory(),
-        inputs : {},
+        inputs : [],
+        new_locations : {},
         startTime : 0,
         runningTime : 0,
         renderTime : 0,
         lastUpdateTime : 0,
         run : function() {
-            this.running = true;
+            var self = this;
+            self.running = true;
             console.log("running");
             for (var playerId in this.players){
                 debug('player', playerId);
-                this.players[playerId].emit('game start', {username: 'game', message : 'game starting'});
+                self.players[playerId].emit('new message', {username: 'game', message : 'game starting, ' + self.playerCount + ' players.'});
             }
             this.startTime = getNanoTime();
             var t0 = getNanoTime();
@@ -113,8 +117,20 @@ var gameFactory = function(){
         },
         writeState : function(){
             var str = '';
-            this.playerEntities.forEach(function(robot){
-                str = str + "## Robot position " + robot.userId + ' '+ robot.position.x +' '+ robot.position.y + '\n';
+            this.playerEntities.forEach(function(playEnt){
+                var map_location = {x: playEnt.physical.position.x, y: playEnt.physical.position.y};
+                // console.log('map_location', playEnt.username, 'pos', map_location);
+                proj.metresToMaps(map_location);
+                // console.log('map_location', playEnt.username, 'pos after', map_location);
+                str = str + "## playEnt position " + playEnt.username + ' '+ map_location.x +' '+ map_location.y + '\n';
+                if (playEnt.bombers.length > 0){
+                    playEnt.bombers.forEach(function(bomber){
+                        var bomber_location = {x: bomber.getX(), y: bomber.getY()};
+                        proj.metresToMaps(bomber_location);
+                        str = str + '--bomber x: ' + bomber_location.x + ' y: ' + bomber_location.y + '\n';
+                    })
+
+                }
             });
             return str;
             },
@@ -129,17 +145,21 @@ var gameFactory = function(){
             this.runningTime += dt;
             this.handleInputs();
             // this.arena.update(dt, this.inputs);
-            this.Engine.update(engine, dt);
-
-
+            this.handleLocations();
+            // console.log('handle locations over');
+            Engine.update(engine, dt);
+            // console.log('engine update over', dt);
             this.renderTime += dt;
+            // console.log('engine update over', this.renderTime);
             if (this.renderTime>0.001){
                 // this.arena.render();
+                // console.log('rendering');
+
                 this.renderTime = 0;
                 for (playerId in this.players){
                     debug('player', playerId);
                     this.players[playerId].emit('gameState', {username: 'game', message: this.writeState()});
-                    this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
+                    // this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
                 }
             }
             if (this.running){
@@ -149,14 +169,51 @@ var gameFactory = function(){
         },
         handleInputs: function(){
             var self = this;
-            this.playerEntities.forEach(function(robot){
-                if (self.inputs[robot.userId]){
-                    Matter.Body.setVelocity(robot, {x:inputs[robot.userId].x, y:inputs[robot.userId].y})
-                    // robot.setDirection(inputs[robot.userId].x, inputs[robot.userId].y);
-                }
+            this.playerEntities.forEach(function(playEnt){
+                self.inputs.filter(function(input){
+                    return (input.userId === playEnt.userId);
+                })
+                    .forEach(function(input, index, obj){
+
+                        if (input.action === 'SEND_BOMBER') {
+                            if (playEnt.bomber_ready > 0) {
+                                console.log('playEnt has bomber_ready > 0', input.target);
+                                proj.mapsToMetres(input.target);
+                                console.log('target after conversion: ', input.target);
+                                bomberFactory(playEnt, self).addTarget(input.target.x, input.target.y);
+                            }
+                        }
+                        obj.splice(index, 1); //remove input after its taken care of
+
+                    });
+
+
+                // if (self.inputs[playEnt.userId]){
+                //     console.log('input', playEnt.userId);
+                //
+                //     Matter.Body.setVelocity(playEnt.physical, {x:self.inputs[playEnt.userId].x, y:self.inputs[playEnt.userId].y});
+                //     self.inputs[playEnt.userId] = null;
+                //     // playEnt.setDirection(inputs[playEnt.userId].x, inputs[playEnt.userId].y);
+                // }
                 // robot.update(dt); removed as all updates now handled in the engine... except things like firing
                 // bullets which will need to be done additionally... hmm
             });
+
+        //    change inputs to array, as there could (potentially) be more than one input per tick per player
+
+        },
+        handleLocations: function(){
+            var self = this;
+            self.playerEntities.forEach(function(playEnt){
+                if (self.new_locations[playEnt.userId]){
+                    console.log('playEnt has location');
+                    proj.mapsToMetres(self.new_locations[playEnt.userId]);
+                    console.log('proj.x', self.new_locations[playEnt.userId].x);
+                    Matter.Body.setPosition(playEnt.physical, {x: self.new_locations[playEnt.userId].x, y: self.new_locations[playEnt.userId].y});
+                    self.new_locations[playEnt.userId] = null;
+                }
+            })
+            
         },
         pause : function(){this.running =false;},
         playerEntities: [],
@@ -165,9 +222,9 @@ var gameFactory = function(){
             console.log("player pushed");
             this.players[player.userId] = player;
             // this.arena.addPlayer(player);
-            var newRobot = robotFactory(this.playerEntities.length +1, this.playerEntities.length +1, player);
-            this.World.add(engine.world, newRobot);
-            this.playerEntities.push(newRobot);
+            var newPlayerEntity = playerFactory(this.playerEntities.length +1, this.playerEntities.length +1, player, this);
+
+            this.playerEntities.push(newPlayerEntity);
             player.game = this;
             this.playerCount ++;
             console.log(this);
@@ -175,22 +232,29 @@ var gameFactory = function(){
                 this.running = true;
                 this.run();
             }
-            debug('all bodies', this.World.bodies);
+            // debug('all bodies', this.World.bodies);
         },
         removePlayer : function(player){
             var self = this;
             debug('game.removePlayer called');
             // this.arena.removePlayer(player);
-            this.playerEntities.forEach(function(ent){
+            var index = null;
+            this.playerEntities.forEach(function(ent, i){
                 if (ent.userId === player.userId){
-                    self.World.remove(engine.world, ent);
+                    //remove from world/physics list
+                    index = i;
+                    self.World.remove(engine.world, ent.physical);
                 }
             });
+            // remove from player entities list
+            if (index){
+                this.playerEntities.slice(index, 1);
+            }
             this.playerCount --;
             if (this.playerCount < 2){
                 this.pause();
             }
-            debug('all bodies', this.World.bodies);
+            // debug('all bodies', this.World.bodies);
         },
         stop : function () {
             
@@ -198,14 +262,67 @@ var gameFactory = function(){
     }
 };
 
-var robotFactory = function(x, y, player){
-    var robot = Bodies.rectangle(x, y, 40, 80);
-    robot.userId = player.userId || null;
-    robot.health = 10;
-    robot.render = function(){
-        console.log("## Robot position ", player.userId, player.username, this.position)
+var playerFactory = function(x, y, player, game){
+    
+    var newPLayer = {
+        userId: player.userId || null,
+        username: player.username,
+        physical: Bodies.rectangle(x, y, 40, 80),
+        health: 100,
+        lat: x,
+        lng: y,
+        bomber_ready: 1,
+        bomber_in_action: 0,
+        bombers: [],
+        renderString: "## Robot position " + player.username + ' ' + player.username + ' ' + this.lat + ' ' + this.lng,
+        update: function () {
+
+        }
     };
-    return robot;
+    game.World.add(game.engine.world, newPLayer.physical);
+    newPLayer.physical.collisionFilter.group = -1;
+    return newPLayer;
+
+};
+
+var bomberFactory = function(playerEntity, game){
+    // create a bomber at the same location as a player, with standard attributes and methiods for dropping a bomb
+    var bomber = {
+        physical: Bodies.rectangle(playerEntity.physical.x, playerEntity.physical.y, 40, 80),
+        damage : 40,
+        owner: playerEntity,
+        range : 50,
+        accuracy: 30,
+        line_of_sight : 50,
+        target : null,
+        speed: 3,
+        addTarget : function(x, y){
+            this.target = Matter.Vector.create(x, y);
+
+        },
+        dropBomb : function(){
+            console.log("bomb dropped");
+        },
+        update : function(){
+            console.log('update bomber to point towards target', this.owner.username);
+            var posToTarget = Vector.sub(this.physical.position, this.target),
+                distanceSq = Vector.magnitudeSquared(posToTarget) || 0.0001,
+                normal = Vector.normalise(distanceSq);
+            this.physical.setVelocity(normal*this.speed);
+        },
+        getX : function(){return this.physical.position.x},
+        getY : function(){return this.physical.position.y}
+    };
+    //add physical object to the game world so it will be processed in physics updates
+    game.World.add(game.engine.world, bomber.physical);
+    //update accounting for where the bomber is etc for easy access
+    playerEntity.bombers.push(bomber);
+    playerEntity.bomber_ready --;
+    playerEntity.bomber_in_action ++;
+    // make bomber non coloding with players or bombers
+    bomber.physical.collisionFilter.group = -1;
+    return bomber;
+
 };
 
 var arenaFactory = function(){
@@ -235,7 +352,7 @@ var arenaFactory = function(){
             });
         },
         addPlayer : function(player){
-            this.robots.push(robotFactory(this.robots.length +1, this.robots.length +1, player));
+            this.robots.push(playerFactory(this.robots.length +1, this.robots.length +1, player));
         },
         removePlayer : function(player){
             debug('arena.removePlayer called');
