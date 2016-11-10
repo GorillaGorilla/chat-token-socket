@@ -61,7 +61,7 @@ module.exports = function(io, client) {
     });
 
     client.on('disconnect', function() {
-        debug('userID', client.userId);
+        console.log('disconnect userID', client.userId);
         for (var gameId in GameServer.games){
             if (GameServer.games[gameId].players[client.userId]){
                 GameServer.games[gameId].removePlayer(client);
