@@ -48,7 +48,11 @@ module.exports = function(io, client) {
 
     client.on('gameInputMessage', function(dat){
         console.log('gameInputMessage',dat);
-        GameServer.games[dat.gameId].inputs.push(dat.input);
+        if (GameServer.games[dat.gameId]){
+            return GameServer.games[dat.gameId].inputs.push(dat.input);
+        }
+        console.log('no game with id', dat.gameId);
+
     });
 
     client.on('location', function(dat){
