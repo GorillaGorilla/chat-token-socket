@@ -2,7 +2,7 @@
   "name": "socket-token",
   "main": "server.js",
   "scripts": {
-    "sectest" : "nsp-check",
+    "sectest" : "nsp check",
     "codetest" : "jshint"
   },
   "dependencies": {
