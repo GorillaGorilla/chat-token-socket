@@ -1,6 +1,10 @@
 {
   "name": "socket-token",
   "main": "server.js",
+  "scripts": {
+    "sectest" : "nsp-check",
+    "codetest" : "jshint"
+  },
   "dependencies": {
     "bcrypt": "^0.8.5",
     "body-parser": "~1.9.2",
