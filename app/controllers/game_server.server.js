@@ -188,7 +188,7 @@ var gameFactory = function(){
                     // console.log('assets', assets);
                     // console.log('playerStates', playerStates);
                     console.log('emitting to: ', this.players[playerId].username);
-                    this.players[playerId].emit('gameState', {players: playerStates,
+                    self.players[playerId].emit('gameState', {players: playerStates,
                     assets: assets});
 
                     // console.log('gameState emitted');
@@ -270,8 +270,10 @@ var gameFactory = function(){
             });
             // remove from player entities list
             if (index){
-                this.playerEntities.slice(index, 1);
+                self.playerEntities.slice(index, 1);
             }
+            self.players[player.userId] = null;
+
             this.playerCount --;
             if (this.playerCount < 2){
                 this.pause();
