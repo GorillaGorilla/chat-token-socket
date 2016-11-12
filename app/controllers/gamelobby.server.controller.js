@@ -43,6 +43,7 @@ module.exports = function(io, client) {
 
         console.log('emitting onconnected', clientsGame);
         client.emit('onconnected', { gameId: clientsGame , numUsers: numUsers, userId : client.userId} );
+        io.emit('new message', {name: 'game', message: '' + client.username + ' joined, total players: ' + numUsers});
     });
 
 

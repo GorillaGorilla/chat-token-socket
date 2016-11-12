@@ -182,7 +182,7 @@ var gameFactory = function(){
                     this.players[playerId].emit('gameState', {players: playerStates,
                     assets: assets});
                     // console.log('gameState emitted');
-                    this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
+                    // this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
                 }
             }
             if (this.running){
