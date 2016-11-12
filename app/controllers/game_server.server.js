@@ -151,6 +151,14 @@ var gameFactory = function(){
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
             });
+            self.bombers.forEach(function(bomber, index){
+                if (bomber.running){
+                    bomber.update(dt);
+                }else{
+                    self.bombers.splice(index,1);
+                }
+
+            });
             // console.log('handle locations over');
             Engine.update(engine, dt);
             // console.log('engine update over', dt);
@@ -177,10 +185,12 @@ var gameFactory = function(){
                 this.renderTime = 0;
                 for (playerId in this.players){
                     debug('player', playerId);
-                    console.log('assets', assets);
-                    console.log('playerStates', playerStates);
+                    // console.log('assets', assets);
+                    // console.log('playerStates', playerStates);
+                    console.log('emitting to: ', this.players[playerId].username);
                     this.players[playerId].emit('gameState', {players: playerStates,
                     assets: assets});
+
                     // console.log('gameState emitted');
                     // this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
                 }
@@ -289,14 +299,7 @@ var playerFactory = function(x, y, player, game){
         renderString: "## Robot position " + player.username + ' ' + player.username + ' ' + this.lat + ' ' + this.lng,
         update: function (dt) {
             var self = this;
-            this.bombers.forEach(function(bomber, index){
-                if (bomber.running){
-                    bomber.update(dt);
-                }else{
-                    self.bombers.splice(index,1);
-                }
 
-            });
         },
         getX: function(){
             return this.physical.position.x;
