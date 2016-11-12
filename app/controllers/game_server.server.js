@@ -18,6 +18,7 @@ debug = require('debug')('http'),
 
 
 var requestUpdateFrame;
+var RENDER_TIME = 100000;
 
     var lastTime = 0;
     var frame_time = 45000;
@@ -165,7 +166,7 @@ var gameFactory = function(){
             this.renderTime += dt;
             // console.log('update: this.renderTime', this.renderTime);
             // console.log('engine update over', this.renderTime);
-            if (this.renderTime>50000.001){
+            if (this.renderTime>RENDER_TIME){
                 // this.arena.render();
                 // console.log('rendering');
                 var assets = [];
