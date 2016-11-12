@@ -92,6 +92,7 @@ var gameFactory = function(){
         runningTime : 0,
         renderTime : 0,
         lastUpdateTime : 0,
+        bombers: [],
         run : function() {
             var self = this;
             self.running = true;
@@ -154,16 +155,34 @@ var gameFactory = function(){
             Engine.update(engine, dt);
             // console.log('engine update over', dt);
             this.renderTime += dt;
+            // console.log('update: this.renderTime', this.renderTime);
             // console.log('engine update over', this.renderTime);
-            if (this.renderTime>0.001){
+            if (this.renderTime>50000.001){
                 // this.arena.render();
                 // console.log('rendering');
-
+                var assets = [];
+                this.bombers.forEach(function(bomber){
+                    var bomberState = bomber.getState();
+                    proj.metresToMaps(bomberState);
+                    assets.push(bomberState);
+                });
+                var playerStates = [];
+                this.playerEntities.forEach(function(entity){
+                    var entityState = entity.getState();
+                    proj.metresToMaps(entityState);
+                    playerStates.push(entityState);
+                    
+                });
+                // console.log('assets created');
                 this.renderTime = 0;
                 for (playerId in this.players){
                     debug('player', playerId);
-                    this.players[playerId].emit('gameState', {username: 'game', message: this.writeState()});
-                    // this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
+                    console.log('assets', assets);
+                    console.log('playerStates', playerStates);
+                    this.players[playerId].emit('gameState', {players: playerStates,
+                    assets: assets});
+                    // console.log('gameState emitted');
+                    this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
                 }
             }
             if (this.running){
@@ -190,16 +209,6 @@ var gameFactory = function(){
                         self.inputs.splice(index, 1); //remove input after its taken care of
 
                     });
-
-                // if (self.inputs[playEnt.userId]){
-                //     console.log('input', playEnt.userId);
-                //
-                //     Matter.Body.setVelocity(playEnt.physical, {x:self.inputs[playEnt.userId].x, y:self.inputs[playEnt.userId].y});
-                //     self.inputs[playEnt.userId] = null;
-                //     // playEnt.setDirection(inputs[playEnt.userId].x, inputs[playEnt.userId].y);
-                // }
-                // robot.update(dt); removed as all updates now handled in the engine... except things like firing
-                // bullets which will need to be done additionally... hmm
             });
 
         //    change inputs to array, as there could (potentially) be more than one input per tick per player
@@ -296,6 +305,19 @@ var playerFactory = function(x, y, player, game){
             return this.physical.position.y;
         }
     };
+
+    var getState = function(){
+        // cannot attach physical, gives circular reference when attempting to emit this obh=j.
+        var playerState = {};
+        playerState.userId = this.userId;
+        playerState.health = this.health;
+        playerState.bomber_ready = this.bomber_ready;
+        playerState.bomber_in_action = this.bomber_in_action;
+        playerState.x = newPLayer.getX();
+        playerState.y = newPLayer.getY();
+        return playerState;
+    };
+    newPLayer.getState = getState;
     game.World.add(game.engine.world, newPLayer.physical);
     newPLayer.physical.collisionFilter.group = -1;
     return newPLayer;
@@ -409,12 +431,26 @@ var bomberFactory = function(playerEntity, game){
 
     };
 
+    var clone = function(){
+        console.log('clone called');
+        var clone = {};
+        clone.damage = this.damage;
+        clone.speed = this.speed;
+        clone.playerId = this.owner.userId;
+        clone.line_of_sight = this.line_of_sight;
+        clone.accuracy = this.accuracy;
+        clone.x = bomber.getX();
+        clone.y = bomber.getY();
+        return clone;
+    };
+    bomber.getState = clone;
     //add physical object to the game world so it will be processed in physics updates
     game.World.add(game.engine.world, bomber.physical);
     //update accounting for where the bomber is etc for easy access
     playerEntity.bombers.push(bomber);
     playerEntity.bomber_ready --;
     playerEntity.bomber_in_action ++;
+    game.bombers.push(bomber);
     // make bomber non coloding with players or bombers
     bomber.physical.collisionFilter.group = -1;
     bomber.setRoutine(bomber.idle);

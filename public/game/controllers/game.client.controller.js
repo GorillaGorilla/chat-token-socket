@@ -63,7 +63,7 @@ angular.module('game').controller('GameController', ['$scope', 'Socket',
         });
 
         Socket.on('gameState', function(state){
-            $scope.score = state.message;
+            $scope.score = state;
         });
 
         Socket.emit('add user', username);
