@@ -98,7 +98,7 @@ var gameFactory = function(){
             var self = this;
             self.running = true;
             console.log("running");
-            for (var playerId in this.players){
+            for (var playerId in self.players){
                 debug('player', playerId);
                 self.players[playerId].emit('new message', {username: 'game', message : 'game starting, ' + self.playerCount + ' players.'});
             }
@@ -273,7 +273,7 @@ var gameFactory = function(){
             if (index){
                 self.playerEntities.slice(index, 1);
             }
-            self.players[player.userId] = null;
+            delete self.players[player.userId];
 
             this.playerCount --;
             if (this.playerCount < 2){
