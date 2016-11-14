@@ -58,7 +58,10 @@ module.exports = function(io, client) {
 
     client.on('location', function(dat){
         console.log('location event',dat);
-        GameServer.games[dat.gameId].new_locations[dat.location.userId] = dat.location;
+        if (GameServer.games[dat.gameId]){
+            GameServer.games[dat.gameId].new_locations[dat.location.userId] = dat.location;
+        }
+
     });
 
     client.on('disconnect', function() {
