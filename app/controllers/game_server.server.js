@@ -45,9 +45,9 @@ game_server.findGame = function(player){
         this.joinGame(player);
     }
 };
-game_server.createGame = function(player){
+game_server.createGame = function(player, socketHandler){
     var id = UUID();
-    this.games[id] = gameFactory();
+    this.games[id] = gameFactory(socketHandler);
     this.game_count ++;
     this.games[id].addPlayer(player);
     console.log("game players: ", this.games[id].playerCount);
@@ -61,7 +61,62 @@ game_server.endGame = function(){
 
 };
 
-var gameFactory = function(){
+game_server.playerLocationUpdate = function(eventData){
+    var self = this;
+    if (self.games[eventData.gameId]){
+        self.games[eventData.gameId].new_locations[eventData.location.userId] = eventData.location;
+    }
+};
+
+game_server.queuePlayerInput = function(eventData){
+    var self = this;
+    if (self.games[eventData.gameId]){
+        return self.games[eventData.gameId].inputs.push(eventData.input);
+    }
+};
+
+game_server.getPlayerEntity = function(){
+    var self = this;
+
+};
+
+var gameFactory = function(socketHandler){
+    var socketHandler = socketHandler || {
+        players: {},
+        addPlayer : function(player){
+            this.players[player.userId] = player;
+        },
+        sendMessages: function(msg){
+            var self = this;
+            for (var playerId in self.players){
+                debug('player', playerId);
+                self.emit(playerId, 'new message', msg);  //^^1
+            }
+        },
+        sendGameState: function(msg){
+            var self = this;
+            for (var playerId in self.players){
+                debug('player', playerId);
+                self.emit(playerId, 'gameState', msg);  //^^1
+            }
+        },
+        emit :function(id, event, msg){
+            this.players[id].emit(event, msg);
+        },
+        removePlayer : function(player){
+            delete this.players[player.userId];
+        }
+
+
+    };
+
+    // if (process.env.NODE_ENV === 'test'){
+    //     socketHandler.emit = function(id, event, msg){
+    //         console.log(Date.now());
+    //         console.log(id + " "+ event +" that would be emitted: ", msg);  //^^1
+    //     };
+    // }
+
     var World = Matter.World;
 
 // create an engine
@@ -77,9 +132,8 @@ var gameFactory = function(){
     World.add(engine.world, [ground]);
 
 
-
-
     return {
+        socketHandler: socketHandler,
         running : false,
         playerCount : 0,
         players : {},
@@ -94,14 +148,26 @@ var gameFactory = function(){
         renderTime : 0,
         lastUpdateTime : 0,
         bombers: [],
+        playerEntities: [],
+        getPlayerEntity: function(id){
+            var playerEntity = null;
+            this.playerEntities.forEach(function(ent){
+                if(ent.userId === id){
+                    playerEntity = ent;
+                    return;
+                }
+            });
+            return playerEntity;
+        },
         run : function() {
             var self = this;
             self.running = true;
             console.log("running");
-            for (var playerId in self.players){
-                debug('player', playerId);
-                self.players[playerId].emit('new message', {username: 'game', message : 'game starting, ' + self.playerCount + ' players.'});
-            }
+            // for (var playerId in self.players){
+            //     debug('player', playerId);
+            //     self.players[playerId].emit('new message', writeMessage());  //^^1
+            // }
+            this.socketHandler.sendMessages(writeMessage());
             this.startTime = getNanoTime();
             var t0 = getNanoTime();
             var deltaTime = (1000000);
@@ -116,6 +182,10 @@ var gameFactory = function(){
                 // this.arena.render();
                 this.renderTime = 0;
             }
+
+            function writeMessage(){
+                return {username: 'game', message : 'game starting, ' + self.playerCount + ' players.'};
+            };
 
         },
         writeState : function(){
@@ -143,7 +213,7 @@ var gameFactory = function(){
             debug("update called", t);
             var dt = (t - this.lastUpdateTime)/1000000000;
             debug("dt", dt);
-            debug ("this.running", this.running)
+            debug ("this.running", this.running);
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
             this.handleInputs();
@@ -184,17 +254,16 @@ var gameFactory = function(){
                 });
                 // console.log('assets created');
                 this.renderTime = 0;
-                for (playerId in this.players){
-                    debug('player', playerId);
-                    // console.log('assets', assets);
-                    // console.log('playerStates', playerStates);
-                    console.log('emitting to: ', this.players[playerId].username);
-                    self.players[playerId].emit('gameState', {players: playerStates,
-                    assets: assets});
-
-                    // console.log('gameState emitted');
-                    // this.players[playerId].emit('new message', {username: 'game', message: this.writeState()});
-                }
+                // for (playerId in this.players){ // ^^2
+                //     debug('player', playerId);
+                //     // console.log('assets', assets);
+                //     // console.log('playerStates', playerStates);
+                //     console.log('emitting to: ', this.players[playerId].username);
+                //     self.players[playerId].emit('gameState', {players: playerStates, assets: assets});//^^3
+                //
+                //
+                // }
+                self.socketHandler.sendGameState({players: playerStates, assets: assets});
             }
             if (this.running){
                 debug("running is true");
@@ -239,18 +308,19 @@ var gameFactory = function(){
             
         },
         pause : function(){this.running =false;},
-        playerEntities: [],
+
         addPlayer : function(player){
             debug('adding player', player.userId);
             console.log("player pushed");
-            this.players[player.userId] = player;
+            // this.players[player.userId] = player;  //^^2
+            this.socketHandler.addPlayer(player);
             // this.arena.addPlayer(player);
             var newPlayerEntity = playerFactory(this.playerEntities.length +1, this.playerEntities.length +1, player, this);
 
             this.playerEntities.push(newPlayerEntity);
             player.game = this;
             this.playerCount ++;
-            console.log(this);
+            // console.log(this);
             if (this.playerCount >1){
                 this.running = true;
                 this.run();
@@ -273,7 +343,8 @@ var gameFactory = function(){
             if (index){
                 self.playerEntities.slice(index, 1);
             }
-            delete self.players[player.userId];
+            // delete self.players[player.userId]; //^^4
+            delete self.socketHandler.players[player.userId];
 
             this.playerCount --;
             if (this.playerCount < 2){
@@ -314,6 +385,7 @@ var playerFactory = function(x, y, player, game){
 
     var getState = function(){
         // cannot attach physical, gives circular reference when attempting to emit this obh=j.
+        // instead this function creates an object with all the key details.
         var playerState = {};
         playerState.userId = this.userId;
         playerState.health = this.health;
@@ -331,9 +403,7 @@ var playerFactory = function(x, y, player, game){
 };
 
 var bomberFactory = function(playerEntity, game){
-    // create a bomber at the same location as a player, with standard attributes and methiods for dropping a bomb
-
-
+    // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb
     var bomber = {
         physical: Bodies.rectangle(playerEntity.physical.position.x, playerEntity.physical.position.y, 10, 10),
         damage : 40,
@@ -462,59 +532,6 @@ var bomberFactory = function(playerEntity, game){
     bomber.setRoutine(bomber.idle);
     return bomber;
 
-};
-
-var arenaFactory = function(){
-
-    return {
-        spaceEmpty : function(x,y){
-            if (isundefined(this[x + ',' + y])){
-                return true;
-            }
-        },
-        robots : [],
-        lazers : [],
-        update: function (dt, inputs){
-            this.robots.forEach(function(robot){
-                if (inputs[robot.id]){
-                    robot.setDirection(inputs[robot.id].x, inputs[robot.id].y);
-                }
-                robot.update(dt);
-            });
-            this.lazers.forEach(function(dt){
-                lazer.update(dt);
-            });
-        },
-        render : function(){
-            this.robots.forEach(function(robot){
-                robot.render();
-            });
-        },
-        addPlayer : function(player){
-            this.robots.push(playerFactory(this.robots.length +1, this.robots.length +1, player));
-        },
-        removePlayer : function(player){
-            debug('arena.removePlayer called');
-            debug("this.robots",this.robots);
-            var index = this.robots.findIndex(function(robot){
-                return robot.id === player.userId;
-            });
-            this.robots.splice(index, index + 1);
-            debug("this.robots",this.robots, index);
-            this.playerCount --;
-
-        }
-    }
-};
-
-var lazerFactory = function(x, y){
-    return {
-        position : Victor(x, y),
-        direction : Victor(x, y),
-        update : function(dt){
-
-        }
-    }
 };
 
 var getNanoTime = function() {

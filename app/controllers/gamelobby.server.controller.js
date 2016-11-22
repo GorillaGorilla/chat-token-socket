@@ -48,20 +48,14 @@ module.exports = function(io, client) {
 
 
     client.on('gameInputMessage', function(dat){
-        console.log('gameInputMessage',dat);
-        if (GameServer.games[dat.gameId]){
-            return GameServer.games[dat.gameId].inputs.push(dat.input);
-        }
-        console.log('no game with id', dat.gameId);
+        // console.log('gameInputMessage',dat);
+        GameServer.queuePlayerInput(dat);
 
     });
 
     client.on('location', function(dat){
-        console.log('location event',dat);
-        if (GameServer.games[dat.gameId]){
-            GameServer.games[dat.gameId].new_locations[dat.location.userId] = dat.location;
-        }
-
+        // console.log('location event',dat);
+        GameServer.playerLocationUpdate(dat);
     });
 
     client.on('disconnect', function() {
@@ -89,3 +83,7 @@ module.exports = function(io, client) {
 
 
 };
+
+
+
+
