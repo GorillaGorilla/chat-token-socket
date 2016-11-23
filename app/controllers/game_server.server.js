@@ -2,6 +2,9 @@
  * Created by GB115151 on 04/08/2016.
  */
 "use strict;"
+
+
+
 var game_server = module.exports = { games : {}, game_count:0 },
 proj = require('./convert_maps'),
 UUID = require('node-uuid'),
@@ -10,7 +13,9 @@ debug = require('debug')('http'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
-    Body =  Matter.Body;
+    Body =  Matter.Body,
+    PlayerFactory = require('../models/PlayerEntity'),
+    BomberFactory = require('../models/Bomber');
 
 
 
@@ -47,7 +52,7 @@ game_server.findGame = function(player){
 };
 game_server.createGame = function(player, socketHandler){
     var id = UUID();
-    this.games[id] = gameFactory(socketHandler);
+    this.games[id] = gameFactory(id, socketHandler);
     this.game_count ++;
     this.games[id].addPlayer(player);
     console.log("game players: ", this.games[id].playerCount);
@@ -62,8 +67,11 @@ game_server.endGame = function(){
 };
 
 game_server.playerLocationUpdate = function(eventData){
+    console.log("playerLocationUpdate", eventData);
     var self = this;
     if (self.games[eventData.gameId]){
+
+        console.log("add location to queue");
         self.games[eventData.gameId].new_locations[eventData.location.userId] = eventData.location;
     }
 };
@@ -75,12 +83,40 @@ game_server.queuePlayerInput = function(eventData){
     }
 };
 
-game_server.getPlayerEntity = function(){
+game_server.getPlayerEntity = function(userId){
+    //loops games looking for a player with that ID. Returns when found.
     var self = this;
-
+    for (gameId in self.games){
+        if (self.games[gameId].getPlayerEntity(userId)){
+            return self.games[gameId].getPlayerEntity(userId);
+        }
+    }
 };
 
-var gameFactory = function(socketHandler){
+game_server.reset = function(){
+    //note that calls to update and gwt next frame will still be sitting on the event queue, so all games should be paused before deleting.
+    var self = this;
+    // console.log('GameServer.reset',this.games);
+    for (game in this.games){
+        console.log(game);
+        if (this.games[game]){
+            this.games[game].pause();
+            self.deleteGame(game);
+        }
+
+    }
+    this.games = {};
+    this.game_count = 0;
+};
+
+game_server.deleteGame = function(gameId){
+    if (this.games[gameId]){
+        this.games[gameId].pause();
+        delete this.games[gameId];
+    }
+};
+
+var gameFactory = function(id, socketHandler){
     var socketHandler = socketHandler || {
         players: {},
         addPlayer : function(player){
@@ -133,6 +169,7 @@ var gameFactory = function(socketHandler){
 
 
     return {
+        gameId: id,
         socketHandler: socketHandler,
         running : false,
         playerCount : 0,
@@ -209,16 +246,16 @@ var gameFactory = function(socketHandler){
             },
 
         update : function (t){
-            self = this;
+            var self = this;
             debug("update called", t);
             var dt = (t - this.lastUpdateTime)/1000000000;
             debug("dt", dt);
             debug ("this.running", this.running);
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
-            this.handleInputs();
+            self.handleInputs();
             // this.arena.update(dt, this.inputs);
-            this.handleLocations();
+            self.handleLocations();
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
             });
@@ -283,7 +320,7 @@ var gameFactory = function(socketHandler){
                                 console.log('playEnt has bomber_ready > 0', input.target);
                                 proj.mapsToMetres(input.target);
                                 console.log('target after conversion: ', input.target);
-                                bomberFactory(playEnt, self).addTarget(input.target.x, input.target.y);
+                                BomberFactory.newBomber(playEnt, self).addTarget(input.target.x, input.target.y);
                             }
                         }
                         self.inputs.splice(index, 1); //remove input after its taken care of
@@ -296,12 +333,13 @@ var gameFactory = function(socketHandler){
         },
         handleLocations: function(){
             var self = this;
+            // console.log('handleLocations called',self.gameId, self.new_locations);
             self.playerEntities.forEach(function(playEnt){
                 if (self.new_locations[playEnt.userId]){
                     console.log('playEnt has location');
                     proj.mapsToMetres(self.new_locations[playEnt.userId]);
-                    console.log('proj.x', self.new_locations[playEnt.userId].x);
-                    Matter.Body.setPosition(playEnt.physical, {x: self.new_locations[playEnt.userId].x, y: self.new_locations[playEnt.userId].y});
+                    // console.log('proj.x', self.new_locations[playEnt.userId].x);
+                    playEnt.setPosition(self.new_locations[playEnt.userId].x, self.new_locations[playEnt.userId].y);
                     self.new_locations[playEnt.userId] = null;
                 }
             })
@@ -315,7 +353,7 @@ var gameFactory = function(socketHandler){
             // this.players[player.userId] = player;  //^^2
             this.socketHandler.addPlayer(player);
             // this.arena.addPlayer(player);
-            var newPlayerEntity = playerFactory(this.playerEntities.length +1, this.playerEntities.length +1, player, this);
+            var newPlayerEntity = PlayerFactory.newPlayer(this.playerEntities.length +1, this.playerEntities.length +1, player, this);
 
             this.playerEntities.push(newPlayerEntity);
             player.game = this;
@@ -358,181 +396,6 @@ var gameFactory = function(socketHandler){
     }
 };
 
-var playerFactory = function(x, y, player, game){
-    
-    var newPLayer = {
-        userId: player.userId || null,
-        username: player.username,
-        physical: Bodies.rectangle(x, y, 10, 10),
-        health: 100,
-        lat: x,
-        lng: y,
-        bomber_ready: 1,
-        bomber_in_action: 0,
-        bombers: [],
-        renderString: "## Robot position " + player.username + ' ' + player.username + ' ' + this.lat + ' ' + this.lng,
-        update: function (dt) {
-            var self = this;
-
-        },
-        getX: function(){
-            return this.physical.position.x;
-        },
-        getY: function(){
-            return this.physical.position.y;
-        }
-    };
-
-    var getState = function(){
-        // cannot attach physical, gives circular reference when attempting to emit this obh=j.
-        // instead this function creates an object with all the key details.
-        var playerState = {};
-        playerState.userId = this.userId;
-        playerState.health = this.health;
-        playerState.bomber_ready = this.bomber_ready;
-        playerState.bomber_in_action = this.bomber_in_action;
-        playerState.x = newPLayer.getX();
-        playerState.y = newPLayer.getY();
-        return playerState;
-    };
-    newPLayer.getState = getState;
-    game.World.add(game.engine.world, newPLayer.physical);
-    newPLayer.physical.collisionFilter.group = -1;
-    return newPLayer;
-
-};
-
-var bomberFactory = function(playerEntity, game){
-    // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb
-    var bomber = {
-        physical: Bodies.rectangle(playerEntity.physical.position.x, playerEntity.physical.position.y, 10, 10),
-        damage : 40,
-        state : 'attack',
-        owner: playerEntity,
-        range : 50,
-        running : true,
-        accuracy: 30,
-        line_of_sight : 50,
-        target : null,
-        speed: 3,
-        addTarget : function(x, y){
-            var self = this;
-            this.target = Vector.create(x, y);
-            console.log('this.target', this.target);
-
-            var posToTarget = Vector.sub(this.target, this.physical.position);
-                console.log('posToTarget:', posToTarget);
-                var distanceSq = Vector.magnitudeSquared(posToTarget) || 0.0001;
-            console.log('distanceSq', distanceSq);
-                var normal = Vector.normalise(posToTarget);
-            console.log('normal', normal);
-            Body.setVelocity(this.physical, Vector.mult(normal, this.speed));
-
-            self.setRoutine(self.goTo(x, y, self));
-
-        },
-        dropBomb : function(){
-            console.log("bomb dropped");
-        },
-        update : function(dt){
-            var self = this;
-            console.log('update bomber to point towards target', this.owner.username);
-            self.routine(dt);
-
-            if (this.state ==='attack'&&self.target && self.atTarget()){
-                console.log('---------------------------------------- at target');
-            //    drop bomb
-            //    setTarget = null;
-            //    return home
-                self.target = null;
-                self.setRoutine(self.goTo(self.owner.getX(), self.owner.getY(), self));
-                self.state = 'return';
-
-            }else if(this.state === 'return' && self.atBase()){
-                self.owner.bomber_ready ++;
-                self.owner.bomber_in_action --;
-                self.running = false;
-            }
-
-        },
-        goTo : function(x, y, entity){
-            console.log('goTo called');
-            return function(){
-                console.log('goTo ', x , y);
-                var self = entity;
-                var destination = Vector.create(x, y);
-                console.log('destination', destination);
-
-                var posToTarget = Vector.sub(destination, self.physical.position);
-                console.log('posToTarget:', posToTarget);
-                var distanceSq = Vector.magnitudeSquared(posToTarget) || 0.0001;
-                console.log('distanceSq', distanceSq);
-                var normal = Vector.normalise(posToTarget);
-                console.log('normal', normal);
-                Body.setVelocity(self.physical, Vector.mult(normal, this.speed));
-            }
-        },
-        idle : function(){
-            return function(){
-                // do nothing};
-            }
-        },
-        getX : function(){return this.physical.position.x},
-        getY : function(){return this.physical.position.y},
-        atTarget : function(){
-            var self = this;
-
-            if (((this.getX() - self.target.x)*(this.getX() - self.target.x) < 40 )
-                &&  ((this.getY() - self.target.y)*(this.getY() - self.target.y) < 40 )){
-                return true;
-            }else {
-                console.log('-------------------- false ');
-                return false;
-            }
-    },
-        atBase : function(){
-            var self = this;
-            if (((this.getX() - self.owner.getX())*(this.getX() - self.owner.getX()) < 40 )
-                &&  ((this.getY() - self.owner.getY())*(this.getY() - self.owner.getY()) < 40 )){
-                return true;
-            }else {
-                console.log('-------------------- false ');
-                return false;
-            }
-        },
-        setRoutine: function(routine){
-        var self = this;
-            self.routine = routine;
-        }
-
-    };
-
-    var clone = function(){
-        console.log('clone called');
-        var clone = {};
-        clone.damage = this.damage;
-        clone.speed = this.speed;
-        clone.playerId = this.owner.userId;
-        clone.line_of_sight = this.line_of_sight;
-        clone.accuracy = this.accuracy;
-        clone.x = bomber.getX();
-        clone.y = bomber.getY();
-        return clone;
-    };
-    bomber.getState = clone;
-    //add physical object to the game world so it will be processed in physics updates
-    game.World.add(game.engine.world, bomber.physical);
-    //update accounting for where the bomber is etc for easy access
-    playerEntity.bombers.push(bomber);
-    playerEntity.bomber_ready --;
-    playerEntity.bomber_in_action ++;
-    game.bombers.push(bomber);
-    // make bomber non coloding with players or bombers
-    bomber.physical.collisionFilter.group = -1;
-    bomber.setRoutine(bomber.idle);
-    return bomber;
-
-};
 
 var getNanoTime = function() {
     var hrTime = process.hrtime();

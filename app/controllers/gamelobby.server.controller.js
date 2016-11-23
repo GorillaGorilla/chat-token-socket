@@ -54,7 +54,7 @@ module.exports = function(io, client) {
     });
 
     client.on('location', function(dat){
-        // console.log('location event',dat);
+        console.log('location event',dat);
         GameServer.playerLocationUpdate(dat);
     });
 
