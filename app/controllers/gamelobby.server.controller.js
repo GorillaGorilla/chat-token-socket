@@ -64,6 +64,9 @@ module.exports = function(io, client) {
         for (var gameId in GameServer.games){
             if (GameServer.games[gameId].players[client.userId]){
                 GameServer.games[gameId].removePlayer(client);
+                if(GameServer.games[gameId].playerCount < 1){
+                    GameServer.deleteGame(gameId);
+                }
                 debug('game found, player removed');
             }
         }
