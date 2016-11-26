@@ -186,6 +186,7 @@ var gameFactory = function(id, socketHandler){
         lastUpdateTime : 0,
         bombers: [],
         playerEntities: [],
+        bombs : [],
         getPlayerEntity: function(id){
             var playerEntity = null;
             this.playerEntities.forEach(function(ent){
@@ -195,6 +196,33 @@ var gameFactory = function(id, socketHandler){
                 }
             });
             return playerEntity;
+        },
+        updateBombs : function(dt){
+            var self = this;
+            self.bombs.forEach(function(bomb, i){
+                bomb.update(dt);
+                if (bomb.state === 'detonate'){
+                    console.log('fire in the hole!');
+                    console.log('x', bomb.getX());
+                    console.log('y', bomb.getY());
+                    self.playerEntities.forEach(function(playEnt){
+                        var distanceVector = Vector.sub(bomb.getPosition(), playEnt.physical.position);
+                        console.log('distanceVector bomb, playEnt', distanceVector);
+                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
+                        console.log('distanceVector bomb, playEnt', distanceSq);
+                        if (distanceSq < bomb.blast_radius){
+                            console.log('hit');
+                            playEnt.health -= bomb.damage;
+                        }
+                    });
+                //    remove bomb
+                    self.bombs.splice(i, 1);
+
+                }
+            });
+        },
+        addBomb : function(bomb){
+            this.bombs.push(bomb);
         },
         run : function() {
             var self = this;
@@ -256,6 +284,7 @@ var gameFactory = function(id, socketHandler){
             self.handleInputs();
             // this.arena.update(dt, this.inputs);
             self.handleLocations();
+            self.updateBombs(dt);
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
             });
@@ -263,6 +292,7 @@ var gameFactory = function(id, socketHandler){
                 if (bomber.running){
                     bomber.update(dt);
                 }else{
+                    // probably a bug here to do with bomber array in the playerEntity... should be a delete method.
                     self.bombers.splice(index,1);
                 }
 
@@ -316,7 +346,7 @@ var gameFactory = function(id, socketHandler){
                     .forEach(function(input, index, obj){
 
                         if (input.action === 'SEND_BOMBER') {
-                            if (playEnt.bomber_ready > 0) {
+                            if (playEnt.bomber_ready > 0 && playEnt.state === 'living') {
                                 console.log('playEnt has bomber_ready > 0', input.target);
                                 proj.mapsToMetres(input.target);
                                 console.log('target after conversion: ', input.target);
@@ -327,8 +357,6 @@ var gameFactory = function(id, socketHandler){
 
                     });
             });
-
-        //    change inputs to array, as there could (potentially) be more than one input per tick per player
 
         },
         handleLocations: function(){
@@ -390,6 +418,7 @@ var gameFactory = function(id, socketHandler){
             }
             // debug('all bodies', this.World.bodies);
         },
+
         stop : function () {
             
         }

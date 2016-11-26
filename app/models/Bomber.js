@@ -6,7 +6,8 @@ var Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
-    Body =  Matter.Body;
+    Body =  Matter.Body,
+    Bomb = require('./Bomb');
 
 exports.newBomber = function(playerEntity, game){
     // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb
@@ -24,45 +25,53 @@ exports.newBomber = function(playerEntity, game){
         addTarget : function(x, y){
             var self = this;
             this.target = Vector.create(x, y);
-            console.log('this.target', this.target);
+            // console.log('this.target', this.target);
 
             var posToTarget = Vector.sub(this.target, this.physical.position);
-            console.log('posToTarget:', posToTarget);
+            // console.log('posToTarget:', posToTarget);
             var distanceSq = Vector.magnitudeSquared(posToTarget) || 0.0001;
-            console.log('distanceSq', distanceSq);
+            // console.log('distanceSq', distanceSq);
             var normal = Vector.normalise(posToTarget);
-            console.log('normal', normal);
+            // console.log('normal', normal);
             Body.setVelocity(this.physical, Vector.mult(normal, this.speed));
 
             self.setRoutine(self.goTo(x, y, self));
 
         },
         dropBomb : function(){
+            game.addBomb(Bomb.newBomb(this.getX(), this.getY()));
             console.log("bomb dropped");
         },
         update : function(dt){
             var self = this;
-            console.log('update bomber to point towards target', this.owner.username);
             self.routine(dt);
 
-            if (this.state ==='attack'&&self.target && self.atTarget()){
+            if (this.state ==='attack' && self.target && self.atTarget()){
                 console.log('---------------------------------------- at target');
-                //    drop bomb
+                self.dropBomb();
                 //    setTarget = null;
                 //    return home
                 self.target = null;
                 self.setRoutine(self.goTo(self.owner.getX(), self.owner.getY(), self));
                 self.state = 'return';
+                self.addTarget(self.owner.getX(),self.owner.getY());
 
-            }else if(this.state === 'return' && self.atBase()){
+            }else if(this.state === 'return' && self.atTarget()){
+                // changed so that tests against target rather than base, so it can still succeed if player moves.
                 self.owner.bomber_ready ++;
                 self.owner.bomber_in_action --;
+                self.owner.bombers.forEach(function(ent, i){
+                    if (ent === self){
+                        self.owner.bombers.splice(i, 1);
+                    }
+                });
                 self.running = false;
             }
 
         },
         goTo : function(x, y, entity){
             console.log('goTo called');
+            console.log('update bomber to point towards target', this.owner.username)
             return function(){
                 console.log('goTo ', x , y);
                 var self = entity;
@@ -72,7 +81,7 @@ exports.newBomber = function(playerEntity, game){
                 var posToTarget = Vector.sub(destination, self.physical.position);
                 console.log('posToTarget:', posToTarget);
                 var distanceSq = Vector.magnitudeSquared(posToTarget) || 0.0001;
-                console.log('distanceSq', distanceSq);
+                // console.log('distanceSq', distanceSq);
                 var normal = Vector.normalise(posToTarget);
                 console.log('normal', normal);
                 Body.setVelocity(self.physical, Vector.mult(normal, this.speed));

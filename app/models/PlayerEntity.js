@@ -15,6 +15,8 @@ exports.newPlayer = function(x, y, player, game){
         username: player.username,
         physical: Bodies.rectangle(x, y, 10, 10),
         health: 100,
+        points: 0,
+        state: 'living',
         lat: x,
         lng: y,
         bomber_ready: 1,
@@ -23,7 +25,9 @@ exports.newPlayer = function(x, y, player, game){
         renderString: "## Robot position " + player.username + ' ' + player.username + ' ' + this.lat + ' ' + this.lng,
         update: function (dt) {
             var self = this;
-
+            if (self.health < 0){
+                this.state = 'wounded';
+            }
         },
         getX: function(){
             return this.physical.position.x;
@@ -41,6 +45,7 @@ exports.newPlayer = function(x, y, player, game){
         // instead this function creates an object with all the key details.
         var playerState = {};
         playerState.userId = this.userId;
+        playerState.state = this.state;
         playerState.health = this.health;
         playerState.bomber_ready = this.bomber_ready;
         playerState.bomber_in_action = this.bomber_in_action;

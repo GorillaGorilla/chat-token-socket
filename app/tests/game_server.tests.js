@@ -2,13 +2,10 @@
  * Created by frederickmacgregor on 21/11/2016.
  */
 "use strict";
-var
-    // should = require('should'),
-    UUID = require('node-uuid'),
+var UUID = require('node-uuid'),
     proj = require('./../controllers/convert_maps'),
     chai = require('chai'),
-    expect = chai.should()
-    ;
+    expect = chai.should();
 
 // setup mock so that game server can be tested without sockets
 
