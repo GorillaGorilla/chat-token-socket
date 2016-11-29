@@ -97,8 +97,8 @@ exports.newBomber = function(playerEntity, game){
         atTarget : function(){
             var self = this;
 
-            if (((this.getX() - self.target.x)*(this.getX() - self.target.x) < 40 )
-                &&  ((this.getY() - self.target.y)*(this.getY() - self.target.y) < 40 )){
+            if (((this.getX() - self.target.x)*(this.getX() - self.target.x) < 10 )
+                &&  ((this.getY() - self.target.y)*(this.getY() - self.target.y) < 10 )){
                 return true;
             }else {
                 console.log('-------------------- false ');
@@ -107,8 +107,8 @@ exports.newBomber = function(playerEntity, game){
         },
         atBase : function(){
             var self = this;
-            if (((this.getX() - self.owner.getX())*(this.getX() - self.owner.getX()) < 40 )
-                &&  ((this.getY() - self.owner.getY())*(this.getY() - self.owner.getY()) < 40 )){
+            if (((this.getX() - self.owner.getX())*(this.getX() - self.owner.getX()) < 10 )
+                &&  ((this.getY() - self.owner.getY())*(this.getY() - self.owner.getY()) < 10 )){
                 return true;
             }else {
                 console.log('-------------------- false ');

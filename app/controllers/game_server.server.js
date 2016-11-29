@@ -276,7 +276,7 @@ var gameFactory = function(id, socketHandler){
         update : function (t){
             var self = this;
             debug("update called", t);
-            var dt = (t - this.lastUpdateTime)/1000000000;
+            var dt = (t - this.lastUpdateTime)/100000000000; // used to be 1000000000
             debug("dt", dt);
             debug ("this.running", this.running);
             this.lastUpdateTime = getNanoTime();
