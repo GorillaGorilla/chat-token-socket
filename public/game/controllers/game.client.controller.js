@@ -6,6 +6,7 @@ angular.module('game').controller('GameController', ['$scope', 'Socket',
     var lat = 50.5 + Math.random()*2 - 1,
         lng = 0.12 + Math.random()*2 -1,
         username = "mr_man" + Math.random();
+        console.log(location.host);
         $scope.start = "not yet";
         $scope.score = 0;
         $scope.gameId = '';
