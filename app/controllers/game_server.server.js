@@ -282,7 +282,8 @@ var gameFactory = function(id, socketHandler){
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
             self.handleInputs();
-
+            // scale dt to slow down game. Remember to put it back for rendering
+            dt = dt/1000;
             // console.log('dt', dt);
             self.handleLocations();
             self.updateBombs(dt);
@@ -303,7 +304,7 @@ var gameFactory = function(id, socketHandler){
 
             // console.log('engine update over', dt);
             // dt = dt/1000;
-            this.renderTime += dt;
+            this.renderTime += dt*1000;
             // console.log('update: this.renderTime', this.renderTime);
             // console.log('engine update over', this.renderTime);
 
