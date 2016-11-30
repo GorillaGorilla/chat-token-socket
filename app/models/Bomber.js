@@ -7,7 +7,8 @@ var Matter = require('matter-js'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    Bomb = require('./Bomb');
+    Bomb = require('./Bomb'),
+    proj = require('../controllers/convert_maps');
 
 exports.newBomber = function(playerEntity, game){
     // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb
@@ -22,6 +23,8 @@ exports.newBomber = function(playerEntity, game){
         line_of_sight : 50,
         target : null,
         speed: 3,
+        lastPos: {x :null, y:null},
+        lastDt: null,
         addTarget : function(x, y){
             var self = this;
             this.target = Vector.create(x, y);
@@ -44,6 +47,12 @@ exports.newBomber = function(playerEntity, game){
         },
         update : function(dt){
             var self = this;
+            if (this.lastPos.x && this.lastDt){
+                var dist = proj.distanceBetweenMetres({x:this.getX(),y:this.getY()}, this.lastPos);
+                console.log('bomber distance covered', dist);
+                var speed = dist/dt;
+                console.log('bomber speed', speed);
+            }
             self.routine(dt);
 
             if (this.state ==='attack' && self.target && self.atTarget()){
@@ -67,7 +76,9 @@ exports.newBomber = function(playerEntity, game){
                 });
                 self.running = false;
             }
-
+            this.lastDt = dt;
+            this.lastPos.x = this.getX();
+            this.lastPos.y = this.getY();
         },
         goTo : function(x, y, entity){
             console.log('goTo called');
