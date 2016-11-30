@@ -9,13 +9,13 @@ var dest = new Proj4js.Proj('EPSG:3785');     //destination coordinates in meter
 
 exports.mapsToMetres = function(objWithxy){
     Proj4js.transform(source, dest, objWithxy);
-    objWithxy.x = objWithxy.x/10;
-    objWithxy.y = objWithxy.y/10;
+    objWithxy.x = objWithxy.x/100;
+    objWithxy.y = objWithxy.y/100;
 };
 
 exports.metresToMaps = function(objWithxy){
-    objWithxy.x = objWithxy.x*10;
-    objWithxy.y = objWithxy.y*10;
+    objWithxy.x = objWithxy.x*100;
+    objWithxy.y = objWithxy.y*100;
     Proj4js.transform(dest, source, objWithxy);
 };
 

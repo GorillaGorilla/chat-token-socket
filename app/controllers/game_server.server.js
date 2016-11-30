@@ -23,7 +23,7 @@ debug = require('debug')('http'),
 
 
 var requestUpdateFrame;
-var RENDER_TIME = 200000;
+var RENDER_TIME = 200;
 
     var lastTime = 0;
     var frame_time = 45000000;
@@ -31,15 +31,17 @@ var RENDER_TIME = 200000;
             // debug('RequestUpdateFrame called');
             debug('lastTime', lastTime);
             var currTime = getNanoTime(),
-                timeToCall = Math.max( 0, frame_time - ( currTime - lastTime ) );
+                timeToCall = Math.max( 0, (frame_time - ( currTime - lastTime ))/1000000 );
             // debug('curtime-lastime', ( currTime - lastTime ));
             game.runningTime += timeToCall;
             game.renderTime += timeToCall;
             debug("curr time", currTime);
             debug("time to call", timeToCall);
-            debug("currtime + timetocall", currTime + timeToCall)
-            var id = setTimeout( function() { callback( currTime + timeToCall ); }, timeToCall/1000000 );
+            debug("time to call", timeToCall/1000000);
+            debug("currtime + timetocall", currTime + timeToCall);
+            var id = setTimeout( function() { callback( currTime + timeToCall*1000000 ); }, timeToCall );
             lastTime = currTime + timeToCall;
+            debug('lastTime waiting', lastTime);
             return id;
         };
 
@@ -270,6 +272,7 @@ var gameFactory = function(id, socketHandler){
         update : function (t){
             var self = this;
             debug("update called", t);
+            debug("update called getNano", getNanoTime());
             var dt = (t - this.lastUpdateTime); // used to be 1000000000
             debug("dt", dt);
             dt = dt/1000000;
@@ -279,10 +282,8 @@ var gameFactory = function(id, socketHandler){
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
             self.handleInputs();
-            // scale dt to slow down game. Remember to put it back for rendering
-            // dt = dt *1000;
-            console.log('dt', dt);
-            // this.arena.update(dt, this.inputs);
+
+            // console.log('dt', dt);
             self.handleLocations();
             self.updateBombs(dt);
             self.playerEntities.forEach(function(ent){
@@ -299,7 +300,7 @@ var gameFactory = function(id, socketHandler){
             });
             // console.log('handle locations over');
             Engine.update(engine, dt);
-            console.log('engine timestamp',engine.timing.timestamp);
+
             // console.log('engine update over', dt);
             // dt = dt/1000;
             this.renderTime += dt;
@@ -307,6 +308,7 @@ var gameFactory = function(id, socketHandler){
             // console.log('engine update over', this.renderTime);
 
             if (this.renderTime>RENDER_TIME){
+                console.log('engine timestamp',engine.timing.timestamp);
                 // this.arena.render();
                 // console.log('rendering');
                 var assets = [];

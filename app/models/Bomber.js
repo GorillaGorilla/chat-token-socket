@@ -47,12 +47,12 @@ exports.newBomber = function(playerEntity, game){
         },
         update : function(dt){
             var self = this;
-            if (this.lastPos.x && this.lastDt){
-                var dist = proj.distanceBetweenMetres({x:this.getX(),y:this.getY()}, this.lastPos);
-                console.log('bomber distance covered', dist);
-                var speed = dist/dt;
-                console.log('bomber speed', speed);
-            }
+            // if (this.lastPos.x && this.lastDt){
+            //     var dist = proj.distanceBetweenMetres({x:this.getX(),y:this.getY()}, this.lastPos);
+            //     console.log('bomber distance covered', dist);
+            //     var speed = dist/dt;
+            //     console.log('bomber speed', speed);
+            // }
             self.routine(dt);
 
             if (this.state ==='attack' && self.target && self.atTarget()){
