@@ -22,7 +22,7 @@ exports.newBomber = function(playerEntity, game){
         accuracy: 30,
         line_of_sight : 50,
         target : null,
-        speed: 3,
+        speed: 0.3,
         lastPos: {x :null, y:null},
         lastDt: null,
         addTarget : function(x, y){
