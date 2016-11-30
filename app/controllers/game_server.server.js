@@ -23,7 +23,7 @@ debug = require('debug')('http'),
 
 
 var requestUpdateFrame;
-var RENDER_TIME = 100000;
+var RENDER_TIME = 500000;
 
     var lastTime = 0;
     var frame_time = 45000;
@@ -159,13 +159,6 @@ var gameFactory = function(id, socketHandler){
     var engine = Engine.create();
 
     engine.world.gravity.y = 0;
-// create two boxes and a ground
-    var boxA = Bodies.rectangle(400, 200, 80, 80);
-    var boxB = Bodies.rectangle(450, 50, 80, 80);
-    var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-
-// add all of the bodies to the world
-    World.add(engine.world, [ground]);
 
 
     return {
@@ -276,12 +269,14 @@ var gameFactory = function(id, socketHandler){
         update : function (t){
             var self = this;
             debug("update called", t);
-            var dt = (t - this.lastUpdateTime)/100000000000; // used to be 1000000000
+            var dt = (t - this.lastUpdateTime)/1000000000; // used to be 1000000000
             debug("dt", dt);
             debug ("this.running", this.running);
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
             self.handleInputs();
+            // scale dt to slow down game. Remember to put it back for rendering
+            dt = dt / 100;
             // this.arena.update(dt, this.inputs);
             self.handleLocations();
             self.updateBombs(dt);
@@ -300,9 +295,11 @@ var gameFactory = function(id, socketHandler){
             // console.log('handle locations over');
             Engine.update(engine, dt);
             // console.log('engine update over', dt);
+            dt = dt*100;
             this.renderTime += dt;
             // console.log('update: this.renderTime', this.renderTime);
             // console.log('engine update over', this.renderTime);
+
             if (this.renderTime>RENDER_TIME){
                 // this.arena.render();
                 // console.log('rendering');

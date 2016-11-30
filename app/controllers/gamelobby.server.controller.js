@@ -60,9 +60,9 @@ module.exports = function(io, client) {
 
     client.on('disconnect', function() {
         console.log('disconnect userID', client.userId);
-        io.emit('new message', {username: "Game", message: client.userId + " disconnected."});
         for (var gameId in GameServer.games){
             if (GameServer.games[gameId].players[client.userId]){
+                io.emit('new message', {username: "Game", message: client.userId + " disconnected."});
                 GameServer.games[gameId].removePlayer(client);
                 if(GameServer.games[gameId].playerCount < 1){
                     GameServer.deleteGame(gameId);

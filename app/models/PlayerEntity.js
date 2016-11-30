@@ -44,6 +44,7 @@ exports.newPlayer = function(x, y, player, game){
         // cannot attach physical, gives circular reference when attempting to emit this obh=j.
         // instead this function creates an object with all the key details.
         var playerState = {};
+        playerState.username = this.username;
         playerState.userId = this.userId;
         playerState.state = this.state;
         playerState.health = this.health;
