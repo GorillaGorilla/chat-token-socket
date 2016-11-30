@@ -158,7 +158,7 @@ var gameFactory = function(id, socketHandler){
 
 // create an engine
     var engine = Engine.create();
-
+    engine.timing.timeScale = 0.1;
     engine.world.gravity.y = 0;
 
 
@@ -272,7 +272,7 @@ var gameFactory = function(id, socketHandler){
             debug("update called", t);
             var dt = (t - this.lastUpdateTime); // used to be 1000000000
             debug("dt", dt);
-            dt = dt/10000000;
+            dt = dt/1000000;
             debug("dt corrected?", dt);
             debug("renderTime", this.renderTime);
             debug ("this.running", this.running);
