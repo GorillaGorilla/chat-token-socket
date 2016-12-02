@@ -5,7 +5,10 @@
 
 var
     UUID = require('node-uuid'),
-    GameServer = require('./../app/controllers/game_server.server.js');
+    GameServer = require('./../app/controllers/game_server.server.js'),
+    Responder = require('mongoose').model('Responder'),
+    socketioJwt = require('socketio-jwt'),
+    config = require('./config');
 
 // // run the engine
 // Engine.run(engine);
@@ -25,7 +28,29 @@ module.exports = function(io){
         next();
     });
 
-    io.on('connection', function (socket) {
+    // io.use(function(socket, next) {
+    //
+    //     var userToken = req.get("Authorization");
+    //     var gameToken = req.get("game_token");
+    //     esponder.findOne({name: req.body.name}, function(err, user) {
+    //         if (err)
+    //         {console.log("mongodb query err", err);
+    //             return res.send(err);}
+    //         if (!user) {
+    //             console.log("no user");
+    //             next(new Error('User is not authenticated'), false);
+    //         } else {
+    //             next(null,true)
+    //         }
+    //     });
+    // });
+
+    io.on('connection', socketioJwt.authorize({
+        secret: Buffer("MegaSecret", 'base64'),
+        timeout: 15000 // 15 seconds to send the authentication message
+    }));
+
+    io.on('authenticated', function (socket) {
 
 
 

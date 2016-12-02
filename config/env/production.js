@@ -23,6 +23,6 @@ if (mongo) {
 
 module.exports = {
     // Development configuration options
-    sessionSecret: "1234",
+    sessionSecret: "ibfD333vpiaubfpia223498wrf2GD",
     db: conn_str
 };

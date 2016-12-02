@@ -5,7 +5,10 @@
 var Responder = require('mongoose').model('Responder'),
     passport = require('passport'),
     jwt         = require('jwt-simple'),
-    config = require("../../config/config.js");
+    jsonWebToken = require('jsonwebtoken'),
+    config = require("../../config/config.js"),
+    UUID = require('node-uuid'),
+    GameServer = require('../controllers/game_server.server');
 
 
 
@@ -52,10 +55,14 @@ exports.authenticate = function(req, res) {
             user.comparePassword(req.body.password, function (err, isMatch) {
                 if (isMatch && !err) {
                     console.log("creating token");
+
                     // if user is found and password is right create a token
-                    var token = jwt.encode(user, config.sessionSecret);
+                    // var token = jwt.encode(user, config.sessionSecret); //old method creating token from secret
+                    var token = jsonWebToken.sign(user, config.sessionSecret);
+                    var game_token = UUID();
+                    GameServer.tokens[req.body.name]={token: token, expires: Date.now() + 360000};
                     // return the information including token as JSON
-                    res.json({success: true, token: 'JWT ' + token});
+                    res.json({success: true, token: 'JWT ' + token, game_token: game_token});
                 } else {
 
                     console.log("compare password err: ", err);

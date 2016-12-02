@@ -5,7 +5,7 @@
 
 
 
-var game_server = module.exports = { games : {}, game_count:0 },
+var game_server = module.exports = { games : {}, game_count:0 , tokens: []},
 proj = require('./convert_maps'),
 UUID = require('node-uuid'),
 debug = require('debug')('http'),
