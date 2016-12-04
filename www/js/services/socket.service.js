@@ -8,7 +8,7 @@ angular.module('login').service('Socket', ['$location', '$timeout', 'AuthService
     this.startConnection = function(callback){
     if (AuthService.getUser()) {
       console.log('socket.service: is authenticated', AuthService.getUser());
-       self.socket = io.connect(API_ENDPOINT.url);
+       self.socket = io.connect('https://socket-token.mybluemix.net');
       self.socket.on('connect', function (msg) {
         console.log("connected", AuthService.getUser());
         self.socket.emit('authenticate', {token: '', name: AuthService.getUser()}); // send the jwt
