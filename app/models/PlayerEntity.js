@@ -12,9 +12,11 @@ exports.newPlayer = function(x, y, player, game){
 
     var newPLayer = {
         userId: player.userId || null,
+        gameId : game.gameId,
         username: player.username,
         physical: Bodies.rectangle(x, y, 10, 10),
         health: 100,
+        playing : true,
         points: 0,
         state: 'living',
         lat: x,

@@ -29,30 +29,56 @@ var RENDER_TIME = 200;
     var frame_time = 45000000;
         requestUpdateFrame = function (game,  callback) {
             // debug('RequestUpdateFrame called');
-            debug('lastTime', lastTime);
+            // debug('lastTime', lastTime);
             var currTime = getNanoTime(),
                 timeToCall = Math.max( 0, (frame_time - ( currTime - lastTime ))/1000000 );
             // debug('curtime-lastime', ( currTime - lastTime ));
             game.runningTime += timeToCall;
             game.renderTime += timeToCall;
-            debug("curr time", currTime);
-            debug("time to call", timeToCall);
-            debug("time to call", timeToCall/1000000);
-            debug("currtime + timetocall", currTime + timeToCall);
+            // debug("curr time", currTime);
+            // debug("time to call", timeToCall);
+            // debug("time to call", timeToCall/1000000);
+            // debug("currtime + timetocall", currTime + timeToCall);
             var id = setTimeout( function() { callback( currTime + timeToCall*1000000 ); }, timeToCall );
             lastTime = currTime + timeToCall;
-            debug('lastTime waiting', lastTime);
+            // debug('lastTime waiting', lastTime);
             return id;
         };
 
 
 game_server.findGame = function(player){
+    var self = this;
     if (this.game_count === 0){
         this.createGame(player);
     }else{
-        this.joinGame(player);
+        var ent = self.getPlayerEntity(player.username);
+        if (ent){
+        //    player is already in a game, therefore replace the old socket connection with the new one.
+            self.games[ent.gameId].socketHandler.addPlayer(player);
+        }else{
+            for (var gameId in self.games){
+                if (this.games[gameId].playerCount < 6){
+                    return this.games[gameId].addPlayer(player);
+                }
+            }
+            // if no free spaces then create a new game
+            this.createGame(player);
+        }
+
+
+        // this.joinGame(player);
     }
 };
+
+game_server.getPlayerGame = function(playerName){
+    var self = this;
+    for (gameId in self.games){
+        if (self.getGame(gameId).getPlayerEntity(playerName)){
+            return self.getGame(gameId);
+        }
+    }
+};
+
 game_server.createGame = function(player, socketHandler){
     var id = UUID();
     this.games[id] = gameFactory(id, socketHandler);
@@ -75,7 +101,7 @@ game_server.playerLocationUpdate = function(eventData){
     if (self.games[eventData.gameId]){
 
         console.log("add location to queue");
-        self.games[eventData.gameId].new_locations[eventData.location.userId] = eventData.location;
+        self.games[eventData.gameId].new_locations[eventData.location.username] = eventData.location;
     }
 };
 
@@ -86,15 +112,19 @@ game_server.queuePlayerInput = function(eventData){
     }
 };
 
-game_server.getPlayerEntity = function(userId){
+game_server.getPlayerEntity = function(username){
     //loops games looking for a player with that ID. Returns when found.
     var self = this;
     for (gameId in self.games){
-        if (self.games[gameId].getPlayerEntity(userId)){
-            return self.games[gameId].getPlayerEntity(userId);
+        if (self.games[gameId].getPlayerEntity(username)){
+            return self.games[gameId].getPlayerEntity(username);
         }
     }
 };
+
+game_server.getGame = function(gameId){
+    return this.games[gameId];
+}
 
 game_server.reset = function(){
     //note that calls to update and gwt next frame will still be sitting on the event queue, so all games should be paused before deleting.
@@ -123,7 +153,7 @@ var gameFactory = function(id, socketHandler){
     var socketHandler = socketHandler || {
         players: {},
         addPlayer : function(player){
-            this.players[player.userId] = player;
+            this.players[player.username] = player;
         },
         sendMessages: function(msg){
             var self = this;
@@ -134,16 +164,16 @@ var gameFactory = function(id, socketHandler){
         },
         sendGameState: function(msg){
             var self = this;
-            for (var playerId in self.players){
-                debug('player', playerId);
-                self.emit(playerId, 'gameState', msg);  //^^1
+            for (var playername in self.players){
+                debug('player', playername);
+                self.emit(playername, 'gameState', msg);  //^^1
             }
         },
-        emit :function(id, event, msg){
-            this.players[id].emit(event, msg);
+        emit :function(name, event, msg){
+            this.players[name].emit(event, msg);
         },
         removePlayer : function(player){
-            delete this.players[player.userId];
+            delete this.players[player.username];
         }
 
 
@@ -183,10 +213,10 @@ var gameFactory = function(id, socketHandler){
         bombers: [],
         playerEntities: [],
         bombs : [],
-        getPlayerEntity: function(id){
+        getPlayerEntity: function(username){
             var playerEntity = null;
             this.playerEntities.forEach(function(ent){
-                if(ent.userId === id){
+                if(ent.username === username){
                     playerEntity = ent;
                     return;
                 }
@@ -271,14 +301,14 @@ var gameFactory = function(id, socketHandler){
 
         update : function (t){
             var self = this;
-            debug("update called", t);
-            debug("update called getNano", getNanoTime());
+            // debug("update called", t);
+            // debug("update called getNano", getNanoTime());
             var dt = (t - this.lastUpdateTime); // used to be 1000000000
             debug("dt", dt);
             dt = dt/1000000;
-            debug("dt corrected?", dt);
-            debug("renderTime", this.renderTime);
-            debug ("this.running", this.running);
+            // debug("dt corrected?", dt);
+            // debug("renderTime", this.renderTime);
+            // debug ("this.running", this.running);
             this.lastUpdateTime = getNanoTime();
             this.runningTime += dt;
             self.handleInputs();
@@ -347,7 +377,7 @@ var gameFactory = function(id, socketHandler){
             var self = this;
             this.playerEntities.forEach(function(playEnt){
                 self.inputs.filter(function(input){
-                    return (input.userId === playEnt.userId);
+                    return (input.username === playEnt.username);
                 })
                     .forEach(function(input, index, obj){
 
@@ -369,12 +399,12 @@ var gameFactory = function(id, socketHandler){
             var self = this;
             // console.log('handleLocations called',self.gameId, self.new_locations);
             self.playerEntities.forEach(function(playEnt){
-                if (self.new_locations[playEnt.userId]){
+                if (self.new_locations[playEnt.username]){
                     console.log('playEnt has location');
-                    proj.mapsToMetres(self.new_locations[playEnt.userId]);
+                    proj.mapsToMetres(self.new_locations[playEnt.username]);
                     // console.log('proj.x', self.new_locations[playEnt.userId].x);
-                    playEnt.setPosition(self.new_locations[playEnt.userId].x, self.new_locations[playEnt.userId].y);
-                    self.new_locations[playEnt.userId] = null;
+                    playEnt.setPosition(self.new_locations[playEnt.username].x, self.new_locations[playEnt.username].y);
+                    self.new_locations[playEnt.username] = null;
                 }
             })
             
@@ -382,7 +412,7 @@ var gameFactory = function(id, socketHandler){
         pause : function(){this.running =false;},
 
         addPlayer : function(player){
-            debug('adding player', player.userId);
+            debug('adding player', player.username);
             console.log("player pushed");
             // this.players[player.userId] = player;  //^^2
             this.socketHandler.addPlayer(player);
@@ -404,19 +434,16 @@ var gameFactory = function(id, socketHandler){
             debug('game.removePlayer called');
             // this.arena.removePlayer(player);
             var index = null;
-            this.playerEntities.forEach(function(ent, i){
-                if (ent.userId === player.userId){
+            self.playerEntities.forEach(function(ent, i){
+                if (ent.username === player.username){
                     //remove from world/physics list
                     index = i;
                     self.World.remove(engine.world, ent.physical);
+                    self.playerEntities.splice(index, 1);
                 }
             });
-            // remove from player entities list
-            if (index){
-                self.playerEntities.slice(index, 1);
-            }
             // delete self.players[player.userId]; //^^4
-            delete self.socketHandler.players[player.userId];
+            delete self.socketHandler.players[player.username];
 
             this.playerCount --;
             if (this.playerCount < 2){

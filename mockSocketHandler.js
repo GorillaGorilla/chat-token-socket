@@ -4,7 +4,7 @@
 module.exports = {
     players: {},
     addPlayer : function(player){
-        this.players[player.userId] = player;
+        this.players[player.username] = player;
     },
     sendMessages: function(msg){
         var self = this;
@@ -39,7 +39,7 @@ module.exports = {
 
     },
     removePlayer : function(player){
-        delete this.players[player.userId];
+        delete this.players[player.username];
     },
     events : {},
     reset : function(){

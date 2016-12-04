@@ -17,7 +17,8 @@ var ResponderSchema = new Schema({
     password: {
         type: String,
         required: true
-    }
+    },
+    last_game_session: String
 });
 
 ResponderSchema.pre('save', function (next) {

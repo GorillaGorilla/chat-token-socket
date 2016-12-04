@@ -8,6 +8,7 @@ var
     GameServer = require('./../app/controllers/game_server.server.js'),
     Responder = require('mongoose').model('Responder'),
     socketioJwt = require('socketio-jwt'),
+    jsonWebToken = require('jsonwebtoken'),
     config = require('./config');
 
 // // run the engine
@@ -23,16 +24,19 @@ var
 module.exports = function(io){
 
 
-    io.use(function(socket, next) {
-        console.log('hello socket middleware');
-        next();
-    });
-
     // io.use(function(socket, next) {
+    //     console.log('hello socket middleware');
+    //     console.log(socket.request);
+    //     next();
+    // });
+    //
+    // io.use(function(socket, next) {
+    //
+    //     console.log('%%%middleware 2',socket.request);
     //
     //     var userToken = req.get("Authorization");
     //     var gameToken = req.get("game_token");
-    //     esponder.findOne({name: req.body.name}, function(err, user) {
+    //     Responder.findOne({name: req.body.name}, function(err, user) {
     //         if (err)
     //         {console.log("mongodb query err", err);
     //             return res.send(err);}
@@ -43,26 +47,73 @@ module.exports = function(io){
     //             next(null,true)
     //         }
     //     });
+    //     next(new Error('User is not authenticated'), false);
+    //     next();
     // });
 
-    io.on('connection', socketioJwt.authorize({
-        secret: Buffer("MegaSecret", 'base64'),
-        timeout: 15000 // 15 seconds to send the authentication message
-    }));
+    // io.on('connection', socketioJwt.authorize({
+    //     secret: Buffer(config.sessionSecret, 'base64'),
+    //     timeout: 15000 // 15 seconds to send the authentication message
+    // }));
+
+    io.on('connection', function(socket){
+        // crazy shit to allow us to pass on the connection to io.authenticated
+        var server = io.server || socket.server;
+        if (!server.$emit) {
+            //then is socket.io 1.0
+            var Namespace = Object.getPrototypeOf(server.sockets).constructor;
+            if (!~Namespace.events.indexOf('authenticated')) {
+                Namespace.events.push('authenticated');
+            }
+        }
+        socket.on('authenticate', function(data){
+
+            if (true){
+                //cant decode token for some reason
+                // console.log('data.token', data.token, config.sessionSecret);
+                // var user = jsonWebToken.verify(data.token, config.sessionSecret);
+                // console.log('user', user.name);
+                if (data.name){
+                    Responder.findOne({name: data.name}, function(err, user) {
+                        if (err)
+                        {console.log("mongodb query err", err);
+                            return socket.emit('unauthorized', err);
+                        }
+
+                        console.log('user retreived?', user);
+                        if (!user) {
+                            console.log("no user");
+                            return socket.emit('unauthorized', "no user");
+                        } else {
+                            socket.emit('authenticated');
+
+                            if (server.$emit) {
+                                server.$emit('authenticated', socket);
+                            } else {
+                                //try getting the current namespace otherwise fallback to all sockets.
+                                var namespace = (server.nsps && socket.nsp &&
+                                    server.nsps[socket.nsp.name]) ||
+                                    server.sockets;
+                                console.log(namespace);
+                                // explicit namespace
+                                namespace.server.emit('authenticated', socket);
+                            }
+                        }
+                    });
+                }
+
+            }
+
+
+            // return socket.emit('unauthorized');
+            // return next(new Error('User is not authenticated'), false);
+
+        });
+        //
+    });
 
     io.on('authenticated', function (socket) {
-
-
-
-        // function run(){
-        //     setInterval(function() {
-        //         Engine.update(engine, 1000 / 30);
-        //         var state = JSON.stringify({boxA: boxA.position, boxB: boxB.position});
-        //         socket.broadcast.emit('new message',{username: 'game', message: state});
-        //         console.log({username: 'game', message: state});
-        //     }, 1000 / 2);
-        // }
-
+        console.log('authenticated event arrived');
         // when the client emits 'new message', this listens and executes
         socket.on('new message', function (data) {
             // we tell the client to execute 'new message'

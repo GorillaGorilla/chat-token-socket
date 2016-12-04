@@ -1,0 +1,27 @@
+<ion-view title="Please sign in">
+  <ion-content>
+    <div class="list">
+      <label class="item item-input item-floating-label">
+    <span class="input-label">Username</span>
+        <input type="text" placeholder="Name" ng-model="user.name">
+      </label>
+      <label class="item item-input item-floating-label">
+    <span class="input-label">Password</span>
+        <input type="password" placeholder="Password" ng-model="user.password">
+      </label>
+    </div>
+    <div class="padding">
+      <button class="button button-block button-balanced" ng-click="login()">
+      Login
+    </button>
+
+      <button class="button button-assertive button-clear button-full" ui-sref="outside.register">Register now!</button>
+    </div>
+    <!-- quick'n'dirty fix to keep footer from overlapping -->
+    <div><br><br></div>
+
+  </ion-content>
+  <div class="bar bar-footer bar-assertive hide-on-keyboard-open">
+    <div class="title">First Respose</div>
+  </div>
+</ion-view>

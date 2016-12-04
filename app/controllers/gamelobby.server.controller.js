@@ -4,9 +4,10 @@
 "use strict";
 var UUID = require('node-uuid');
 var GameServer = require('./game_server.server.js');
-var debug = require('debug');
+var debug = require('debug'),
+    UserController = require('../routes/auth.server.controller');
 
-
+// total number of players across all games (including disconnected ones???)
 var numUsers = 0;
 
 module.exports = function(io, client) {
@@ -17,32 +18,30 @@ module.exports = function(io, client) {
     //5b2ca132-64bd-4513-99da-90e838ca47d1
     //and store this on their client/connection
     // client.userid = UUID();
-    client.on('add user', function (username) {
-        console.log('add user', username);
+    client.on('add user', function (data) {
+        //should look for games, if there's no game then create one, if there is a game then
+        console.log('add user', data);
+        var username = data.name,
+            userToken = data.token;
         if (addedUser) {return};
 
         // we store the username in the socket session for this client
         client.username = username;
         client.userId = UUID();
-        console.log('add user', client.userId);
+        console.log('add user', client.username);
         addedUser = true;
         numUsers ++;
-
-        if (GameServer.game_count ===0){
-            clientsGame = GameServer.createGame(client);
-        }else{
-            for (var gameId in GameServer.games){
-                if (GameServer.games[gameId].playerCount < 6){
-                    GameServer.games[gameId].addPlayer(client);
-                    clientsGame = gameId;
-                }
-            }
-            clientsGame = clientsGame || GameServer.createGame(client) ;
-        };
+        //check each game for the player. Name should be unique. Called once when a new socket connects
+        GameServer.findGame(client);
 
 
-        console.log('emitting onconnected', clientsGame);
-        client.emit('onconnected', { gameId: clientsGame , numUsers: numUsers, userId : client.userId} );
+        var clientsGame = GameServer.getPlayerGame(username);
+        console.log('emitting onconnected', clientsGame.gameId);
+        UserController.updateGameSession(client.username, client.gameId);
+        // if (clientsGame.running){
+        //
+        // }
+        client.emit('game connected', { gameId: clientsGame.gameId , numUsers: clientsGame.playerCount, username : client.username} );
         io.emit('new message', {username: 'game', message: '' + client.username + ' joined, total players: ' + numUsers});
     });
 
@@ -58,11 +57,16 @@ module.exports = function(io, client) {
         GameServer.playerLocationUpdate(dat);
     });
 
-    client.on('disconnect', function() {
-        console.log('disconnect userID', client.userId);
+    client.on('leave game',function(dat){
+        console.log('---------------------------------leave game');
+        console.log('-');
+        console.log('-');
+        console.log('-');
+        console.log('-');
         for (var gameId in GameServer.games){
-            if (GameServer.games[gameId].players[client.userId]){
-                io.emit('new message', {username: "Game", message: client.userId + " disconnected."});
+            console.log('gameId', gameId);
+            if (GameServer.games[gameId].getPlayerEntity(client.username)){
+                io.emit('new message', {username: "Game", message: client.username + " disconnected."});
                 GameServer.games[gameId].removePlayer(client);
                 if(GameServer.games[gameId].playerCount < 1){
                     GameServer.deleteGame(gameId);
@@ -79,7 +83,10 @@ module.exports = function(io, client) {
                 numUsers: numUsers
             });
         }
+    });
 
+    client.on('disconnect', function() {
+        console.log('disconnect username', client.username);
 
     });
 

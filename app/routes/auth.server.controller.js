@@ -54,15 +54,18 @@ exports.authenticate = function(req, res) {
             // check if password matches
             user.comparePassword(req.body.password, function (err, isMatch) {
                 if (isMatch && !err) {
-                    console.log("creating token");
+
 
                     // if user is found and password is right create a token
                     // var token = jwt.encode(user, config.sessionSecret); //old method creating token from secret
                     var token = jsonWebToken.sign(user, config.sessionSecret);
+                    // console.log("token created", token);
+                    // console.log(jsonWebToken.verify(token, config.sessionSecret));
+                    // console.log('again ',jsonWebToken.verify(token, config.sessionSecret));
                     var game_token = UUID();
-                    GameServer.tokens[req.body.name]={token: token, expires: Date.now() + 360000};
+                    // GameServer.tokens[req.body.name]={token: token, expires: Date.now() + 360000, name: user.name};
                     // return the information including token as JSON
-                    res.json({success: true, token: 'JWT ' + token, game_token: game_token});
+                    res.json({success: true, token: token, game_token: game_token, name: user.name});
                 } else {
 
                     console.log("compare password err: ", err);
@@ -71,6 +74,20 @@ exports.authenticate = function(req, res) {
             });
         }
     });
+};
+
+exports.updateGameSession = function(name,newUserSessionId){
+    Responder.findOne({
+        name: name
+    }, function(err, user) {
+        user.last_game_session = newUserSessionId;
+        user.save(function(err) {
+            if (err) {
+                console.log("mongo save err", err);
+            }
+            console.log('Successful updated user.');
+        });
+    })
 };
 
 

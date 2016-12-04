@@ -3,6 +3,6 @@
  */
 "use strict";
 module.exports = {
-    db: 'mongodb://localhost/token-auth-test',
+    db: 'mongodb://localhost/game-token-test',
     sessionSecret: 'Your Application Session Secret'
 };

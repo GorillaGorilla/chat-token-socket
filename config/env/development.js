@@ -3,7 +3,7 @@
  */
 module.exports = {
     // Development configuration options
-    db: 'mongodb://localhost/token-template',
+    db: 'mongodb://localhost/game-token-dev',
     sessionSecret: 'developmentSessionSecret'
 };
 

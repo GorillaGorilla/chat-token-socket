@@ -13,13 +13,16 @@ var express     = require('express'),
     jwt         = require('jwt-simple'),
     cfenv = require('cfenv'),
     controller = require("./app/routes/auth.server.controller.js"),
-    users = require("./app/routes/users.server.controller"),
-    survey = require("./app/routes/survey.server.controller"),
     server = require('http').createServer(app),
     io = require('socket.io')(server);
 
 
-
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:8100');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+};
 
 // get our request parameters7
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,6 +34,7 @@ app.use(morgan('dev'));
 // Use the passport package in our application
 app.use(passport.initialize());
 
+app.use(allowCrossDomain);
 
 // pass passport for configuration
 require('./config/passport')(passport);
@@ -54,7 +58,7 @@ apiRoutes.get('/users', passport.authenticate('jwt', { session: false}), functio
 // connect the api routes under /api/*
 app.use('/api', apiRoutes);
 
-app.use(express.static('./public'));
+app.use(express.static('./www'));
 
 // demo Route (GET http://localhost:8080)
 

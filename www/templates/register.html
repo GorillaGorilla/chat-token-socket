@@ -1,0 +1,37 @@
+<ion-view title="Create a new account">
+  <ion-content>
+    <div class="card">
+    <div class="list">
+      <div class="item item-divider">Account Details</div>
+      <label class="item item-input item-floating-label">
+    <span class="input-label">Username</span>
+        <input type="text" placeholder="username" ng-model="user.name">
+      </label>
+      <label class="item item-input item-floating-label">
+    <span class="input-label">Password</span>
+        <input type="password" placeholder="Password" ng-model="user.password">
+      </label>
+      <br>
+      <!--<div class="item item-divider">
+        <p>Met Police or Paramedic?</p>
+      </div>
+      <ion-radio ng-repeat="item in emerServices" ng-value="item.value" ng-model="user.service" name="emerServices">
+        {{ item.text }}
+      </ion-radio>-->
+
+    </div>
+    </div>
+    <div class="padding">
+      <button class="button button-block button-assertive" ng-click="signup()">
+      Submit Details
+    </button>
+    </div>
+    <!-- quick'n'dirty fix to keep footer from overlapping -->
+    <div><br><br></div>
+
+  </ion-content>
+  <!--<div class="bar bar-footer bar-assertive hide-on-keyboard-open">-->
+    <!--<div class="title">First Respose</div>-->
+  <!--</div>-->
+
+</ion-view>
