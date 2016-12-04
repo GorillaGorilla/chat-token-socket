@@ -14,7 +14,8 @@ var express     = require('express'),
     cfenv = require('cfenv'),
     controller = require("./app/routes/auth.server.controller.js"),
     server = require('http').createServer(app),
-    io = require('socket.io')(server);
+    io = require('socket.io')(server),
+    transport = require('./config/transportsecurity');
 
 
 var allowCrossDomain = function(req, res, next) {
@@ -23,6 +24,13 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type');
     next();
 };
+
+if (process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev'));
+}else if (process.env.NODE_ENV === 'production') {
+    // app.use(compress());
+    app.use(transport.httpsEnforce);
+}
 
 // get our request parameters7
 app.use(bodyParser.urlencoded({ extended: false }));

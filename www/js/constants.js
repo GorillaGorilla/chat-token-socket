@@ -8,6 +8,6 @@ angular.module('starter')
   })
 
   .constant('API_ENDPOINT', {
-    url: 'http://localhost:6017'
+    url: 'https://socket-token.mybluemix.net'
     //  For a simulator use: url: 'http://127.0.0.1:8080/api'
   });
