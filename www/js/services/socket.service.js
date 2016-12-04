@@ -2,13 +2,13 @@
  * Created by frederickmacgregor on 26/11/2016.
  */
 angular.module('login').service('Socket', ['$location', '$timeout', 'AuthService',
-  function($location, $timeout, AuthService) {
+  function($location, $timeout, AuthService, API_ENDPOINT) {
     var self = this;
     var connected = false;
     this.startConnection = function(callback){
     if (AuthService.getUser()) {
       console.log('socket.service: is authenticated', AuthService.getUser());
-       self.socket = io.connect('http://localhost:6017');
+       self.socket = io.connect(API_ENDPOINT.url);
       self.socket.on('connect', function (msg) {
         console.log("connected", AuthService.getUser());
         self.socket.emit('authenticate', {token: '', name: AuthService.getUser()}); // send the jwt
