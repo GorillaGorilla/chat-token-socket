@@ -10,7 +10,7 @@ angular.module('login').service('Location',function($cordovaGeolocation){
     $cordovaGeolocation.getCurrentPosition(options).then(function(position){
 
       var latLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        alert('location gotten  ' + latLng.lat() + ' ' + latLng.lng());
+        // alert('location gotten  ' + latLng.lat() + ' ' + latLng.lng());
       lastLocation = latLng
     }, function(error){
       console.log("Could not get location");
@@ -42,7 +42,7 @@ angular.module('login').service('Location',function($cordovaGeolocation){
   };
   getPosition();
   // setInterval()     //use this to update position? or set listener for change in position....
-
+    setInterval(getPosition, 60000);
   return {
     currentLocation: currentLocation,
     getX : getX,

@@ -2,9 +2,22 @@
   <ion-content>
     <div id="map" data-tap-disabled="true"></div>
     <div id="controls">
-      <button class="button button-block button-assertive" ng-click="sendBomber()" >
+      <button class="button button-block button-assertive" ng-show="UI_STATE === 'VIEW'" ng-click="setBomberTargettingState()" >
+        Target for Bomber
+      </button>
+      <button class="button button-block button-assertive" ng-show="UI_STATE === 'VIEW'" ng-click="setBatteryTargettingState()" >
+        Target for AA Gun
+      </button>
+      <button class="button button-block button-assertive" ng-show="UI_STATE === 'SEND_BOMBER'" ng-click="sendBomber()" >
         Send Bomber
       </button>
+      <button class="button button-block button-assertive" ng-show="UI_STATE === 'SEND_BATTERY'" ng-click="sendAABattery()" >
+        Send AA Gun
+      </button>
+      <button class="button button-block button-assertive" ng-show="UI_STATE !== 'VIEW'" ng-click="setViewState()" >
+        Back
+      </button>
+      <br>
       <button class="button button-block button-assertive" ng-click="leaveGame()" >
         Leave game
       </button>

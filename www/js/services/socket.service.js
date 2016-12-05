@@ -6,6 +6,7 @@ angular.module('login').service('Socket', ['$location', '$timeout', 'AuthService
     var self = this;
     var connected = false;
     this.startConnection = function(callback){
+      console.log('API_EndPOINT',API_ENDPOINT);
     if (AuthService.getUser()) {
       console.log('socket.service: is authenticated', AuthService.getUser());
        self.socket = io.connect('https://socket-token.mybluemix.net');

@@ -14,7 +14,7 @@ exports.newBomb = function(x, y){
     bomb.state = 'live';
     bomb.fuse = 0.001;
     bomb.damage = 34;
-    bomb.blast_radius = 30;
+    bomb.blast_radius = 50;
     bomb.update = function(dt){
         console.log('bomb update', bomb.fuse, dt, bomb.getX(), bomb.getY());
         bomb.fuse -= dt*10;

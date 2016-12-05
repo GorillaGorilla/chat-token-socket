@@ -24,6 +24,9 @@ exports.newPlayer = function(x, y, player, game){
         bomber_ready: 1,
         bomber_in_action: 0,
         bombers: [],
+        battery_ready: 1,
+        battery_in_action: 0,
+        AAbatterys: [],
         renderString: "## Robot position " + player.username + ' ' + player.username + ' ' + this.lat + ' ' + this.lng,
         update: function (dt) {
             var self = this;
@@ -39,6 +42,9 @@ exports.newPlayer = function(x, y, player, game){
         },
         setPosition : function(x, y){
             Matter.Body.setPosition(this.physical, {x: x, y: y});
+        },
+        getPosition : function () {
+            return this.physical.position;
         }
     };
 

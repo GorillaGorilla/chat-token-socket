@@ -20,6 +20,7 @@ exports.newBomber = function(playerEntity, game){
         range : 50,
         running : true,
         accuracy: 30,
+        health: 50,
         line_of_sight : 50,
         target : null,
         speed: 0.3,
@@ -47,6 +48,9 @@ exports.newBomber = function(playerEntity, game){
         },
         update : function(dt){
             var self = this;
+            if (self.health <= 0){
+                return self.running = false;
+            }
             // if (this.lastPos.x && this.lastDt){
             //     var dist = proj.distanceBetweenMetres({x:this.getX(),y:this.getY()}, this.lastPos);
             //     console.log('bomber distance covered', dist);
@@ -75,6 +79,7 @@ exports.newBomber = function(playerEntity, game){
                     }
                 });
                 self.running = false;
+                // game.World.engine
             }
             this.lastDt = dt;
             this.lastPos.x = this.getX();
@@ -129,6 +134,9 @@ exports.newBomber = function(playerEntity, game){
         setRoutine: function(routine){
             var self = this;
             self.routine = routine;
+        },
+        getPosition : function () {
+            return this.physical.position;
         }
 
     };
@@ -136,7 +144,9 @@ exports.newBomber = function(playerEntity, game){
     var clone = function(){
         console.log('clone called');
         var clone = {};
+        clone.type = "BOMBER";
         clone.damage = this.damage;
+        clone.health = this.health;
         clone.speed = this.speed;
         clone.playerId = this.owner.userId;
         clone.line_of_sight = this.line_of_sight;

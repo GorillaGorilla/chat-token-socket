@@ -3,8 +3,6 @@
  */
 "use strict;"
 
-
-
 var game_server = module.exports = { games : {}, game_count:0 , tokens: []},
 proj = require('./convert_maps'),
 UUID = require('node-uuid'),
@@ -15,7 +13,8 @@ debug = require('debug')('http'),
     Vector = Matter.Vector,
     Body =  Matter.Body,
     PlayerFactory = require('../models/PlayerEntity'),
-    BomberFactory = require('../models/Bomber');
+    BomberFactory = require('../models/Bomber'),
+    BatteryFactory = require('../models/AABattery');
 
 
 
@@ -211,8 +210,10 @@ var gameFactory = function(id, socketHandler){
         renderTime : 0,
         lastUpdateTime : 0,
         bombers: [],
+        AAbatterys: [],
         playerEntities: [],
         bombs : [],
+        flaks : [],
         getPlayerEntity: function(username){
             var playerEntity = null;
             this.playerEntities.forEach(function(ent){
@@ -242,13 +243,41 @@ var gameFactory = function(id, socketHandler){
                         }
                     });
                 //    remove bomb
-                    self.bombs.splice(i, 1);
+
 
                 }
             });
         },
+        updateFlaks: function(dt){
+            var self = this;
+            self.flaks.forEach(function(flak, i){
+                console.log('updating a flak');
+                if (flak.state === 'live'){
+                    flak.update(dt);
+                    self.bombers.forEach(function(bomber){
+                        var distanceVector = Vector.sub(flak.getPosition(), bomber.physical.position);
+                        console.log('distanceVector flak, playEnt', distanceVector);
+                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
+                        console.log('distanceVector flak, playEnt', distanceSq);
+                        if (distanceSq < 300){
+                            console.log('hit');
+                            bomber.health -= flak.damage;
+                            self.flaks.splice(i, 1);
+                        }
+                    });
+                }else{
+                    console.log('removing flak ', i);
+                    self.flaks.splice(i, 1);
+                }
+
+
+            });
+        },
         addBomb : function(bomb){
             this.bombs.push(bomb);
+        },
+        addFlak : function(flak){
+            this.flaks.push(flak);
         },
         run : function() {
             var self = this;
@@ -317,6 +346,7 @@ var gameFactory = function(id, socketHandler){
             // console.log('dt', dt);
             self.handleLocations();
             self.updateBombs(dt);
+            self.updateFlaks(dt);
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
             });
@@ -328,6 +358,14 @@ var gameFactory = function(id, socketHandler){
                     self.bombers.splice(index,1);
                 }
 
+            });
+            self.AAbatterys.forEach(function(battery, index){
+                if (battery.running){
+                    battery.update(dt);
+                }else{
+                    // probably a bug here to do with bomber array in the playerEntity... should be a delete method.
+                    self.AAbatterys.splice(index,1);
+                }
             });
             // console.log('handle locations over');
             Engine.update(engine, dt);
@@ -343,6 +381,16 @@ var gameFactory = function(id, socketHandler){
                 // this.arena.render();
                 // console.log('rendering');
                 var assets = [];
+                this.flaks.forEach(function(flak){
+                    var flakState = flak.getState();
+                    proj.metresToMaps(flakState);
+                    assets.push(flakState);
+                });
+                this.AAbatterys.forEach(function(battery){
+                    var batteryState = battery.getState();
+                    proj.metresToMaps(batteryState);
+                    assets.push(batteryState);
+                });
                 this.bombers.forEach(function(bomber){
                     var bomberState = bomber.getState();
                     proj.metresToMaps(bomberState);
@@ -387,6 +435,13 @@ var gameFactory = function(id, socketHandler){
                                 proj.mapsToMetres(input.target);
                                 console.log('target after conversion: ', input.target);
                                 BomberFactory.newBomber(playEnt, self).addTarget(input.target.x, input.target.y);
+                            }
+                        } else if(input.action === 'SEND_BATTERY'){
+                            if (playEnt.battery_ready > 0 && playEnt.state === 'living') {
+                                console.log('playEnt has battery_ready > 0', input.destination);
+                                proj.mapsToMetres(input.destination);
+                                console.log('target after conversion: ', input.destination);
+                                BatteryFactory.newBattery(playEnt, self).addDestination(input.destination.x, input.destination.y);
                             }
                         }
                         self.inputs.splice(index, 1); //remove input after its taken care of
