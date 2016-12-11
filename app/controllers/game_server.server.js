@@ -262,6 +262,8 @@ var gameFactory = function(id, socketHandler){
                         if (distanceSq < 300){
                             console.log('hit');
                             bomber.health -= flak.damage;
+                            // remove flak from here, but also from Engine!
+                            self.World.remove(engine.world, ent.physical);
                             self.flaks.splice(i, 1);
                         }
                     });
@@ -355,6 +357,7 @@ var gameFactory = function(id, socketHandler){
                     bomber.update(dt);
                 }else{
                     // probably a bug here to do with bomber array in the playerEntity... should be a delete method.
+                    self.World.remove(engine.world, bomber);
                     self.bombers.splice(index,1);
                 }
 
@@ -364,6 +367,7 @@ var gameFactory = function(id, socketHandler){
                     battery.update(dt);
                 }else{
                     // probably a bug here to do with bomber array in the playerEntity... should be a delete method.
+                    self.World.remove(engine.world, battery.physical);
                     self.AAbatterys.splice(index,1);
                 }
             });

@@ -55,6 +55,7 @@ exports.newBattery = function(playerEntity, game){
             var normal = Vector.normalise(posToDestination);
             // console.log('normal', normal);
             var velocity = Vector.mult(normal, 10);
+            Vector.add(velocity, Vector.create(Math.random(), Math.Random()));
             var flak = Flak.newFlak(this.getX(), this.getY(), velocity, game);
             game.addFlak(flak);
             console.log("flak added");
