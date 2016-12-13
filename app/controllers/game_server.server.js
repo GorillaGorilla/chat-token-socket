@@ -14,7 +14,8 @@ debug = require('debug')('http'),
     Body =  Matter.Body,
     PlayerFactory = require('../models/PlayerEntity'),
     BomberFactory = require('../models/Bomber'),
-    BatteryFactory = require('../models/AABattery');
+    BatteryFactory = require('../models/AABattery'),
+    Attack = require('mongoose').model('Attack');
 
 
 
@@ -262,8 +263,20 @@ var gameFactory = function(id, socketHandler){
                         if (distanceSq < 300){
                             console.log('hit');
                             bomber.health -= flak.damage;
+                            var attackRecord = new Attack({
+                                type: "FLAK HIT",
+                                owner: flak.owner.username,
+                                target: bomber.owner.username
+                            });
+                            attackRecord.save(function(err){
+                                if (err){
+                                    console.log('save err', err)
+                                }else{
+                                    console.log('saved attack record');
+                                }
+                            });
                             // remove flak from here, but also from Engine!
-                            self.World.remove(engine.world, ent.physical);
+                            self.World.remove(engine.world, flak.physical);
                             self.flaks.splice(i, 1);
                         }
                     });

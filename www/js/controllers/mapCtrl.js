@@ -10,6 +10,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     markers = [],
       targetFinder = null,
     latLng = Location.currentLocation(),
+      locationQueued = false,
     playerState,
     icons = {
         player: "img/player_icon.png",
@@ -21,6 +22,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     var locationEvent = function(){
         console.log('location', Location.getX(), Location.getY());
         Socket.emit('location', {gameId: UserGameIds.getGameId(), location: {username : UserGameIds.getUsername(), x : Location.getX(), y: Location.getY()}});
+        locationQueued = false;
     };
     $scope.UI_STATE = 'VIEW';  //view, send_bomber, send_AA
 
@@ -112,7 +114,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     // console.log('game state', state);
     $scope.score = state;
     render(state);
-
+    delayPositionCall();
   });
 
   function render(state){
@@ -175,6 +177,17 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     setMapOnAll(null);
     markers = [];
   }
+
+    var delayPositionCall = function(){
+      if(!locationQueued){
+          setTimeout(function(){
+              Location.getPosition(locationEvent());
+
+          }, 45000);
+          locationQueued = true;
+      }
+
+    };
 
 
 
