@@ -125,7 +125,7 @@ exports.newBattery = function(playerEntity, game){
             var self = this;
             return function(){
             //
-                if (target && (target.health > 0)){
+                if (target && (target.health > 0) && target.running){
                     // check whether still in range, remove target if not and
                 //    if it is in range, create a flak with a high velocity aiming at the target in line with accuracy
                 //    call this function off the game, which will have the flakFactory and return so nothing else happens

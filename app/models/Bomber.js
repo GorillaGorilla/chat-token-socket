@@ -43,7 +43,7 @@ exports.newBomber = function(playerEntity, game){
 
         },
         dropBomb : function(){
-            game.addBomb(Bomb.newBomb(this.getX(), this.getY()));
+            game.addBomb(Bomb.newBomb(this.getX(), this.getY(), this));
             console.log("bomb dropped");
         },
         update : function(dt){

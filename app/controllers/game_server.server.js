@@ -241,10 +241,19 @@ var gameFactory = function(id, socketHandler){
                         if (distanceSq < bomb.blast_radius){
                             console.log('hit');
                             playEnt.health -= bomb.damage;
+                            var attackRecord = new Attack({
+                                game: self.gameId,
+                                type: "BOMB HIT",
+                                owner: bomb.owner.username,
+                                target: playEnt.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
                         }
                     });
                 //    remove bomb
 
+                    self.bombs.splice(i, 1);
 
                 }
             });
@@ -264,9 +273,12 @@ var gameFactory = function(id, socketHandler){
                             console.log('hit');
                             bomber.health -= flak.damage;
                             var attackRecord = new Attack({
+                                game: self.gameId,
                                 type: "FLAK HIT",
                                 owner: flak.owner.username,
-                                target: bomber.owner.username
+                                target: bomber.owner.username,
+                                x: flak.getX(),
+                                y: flak.getY()
                             });
                             attackRecord.save(function(err){
                                 if (err){

@@ -7,12 +7,13 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body;
 
-exports.newBomb = function(x, y){
+exports.newBomb = function(x, y, owner){
     var bomb = {
     };
     bomb.physical = Bodies.rectangle(x, y, 1, 1),
     bomb.state = 'live';
     bomb.fuse = 0.001;
+    bomb.owner = owner;
     bomb.damage = 34;
     bomb.blast_radius = 50;
     bomb.update = function(dt){

@@ -8,6 +8,7 @@ var mongoose = require('mongoose'),
 // different types: when bomb is damages player, when flak is fired, when flak hits?
 
 var AttackSchema = new Schema({
+    game: String,
     occurred: {
         type: Date,
         default: Date.now
