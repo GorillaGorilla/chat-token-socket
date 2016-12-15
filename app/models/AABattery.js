@@ -196,7 +196,7 @@ exports.newBattery = function(playerEntity, game){
     };
 
     var clone = function(){
-        console.log('clone called');
+        // console.log('clone called');
         var clone = {};
         clone.damage = this.damage;
         clone.speed = this.speed;

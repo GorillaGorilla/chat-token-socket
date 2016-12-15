@@ -47,7 +47,7 @@ module.exports = function(io, client) {
 
 
     client.on('gameInputMessage', function(dat){
-        // console.log('gameInputMessage',dat);
+        console.log('gameInputMessage',dat);
         GameServer.queuePlayerInput(dat);
 
     });

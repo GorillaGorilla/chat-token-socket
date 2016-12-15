@@ -193,6 +193,7 @@ var gameFactory = function(id, socketHandler){
     engine.timing.timeScale = 0.1;
     engine.world.gravity.y = 0;
 
+    var nextState = {};  //variable to queue up things that need to be sent in the next rendering/synch event
 
     return {
         gameId: id,
@@ -243,14 +244,49 @@ var gameFactory = function(id, socketHandler){
                             playEnt.health -= bomb.damage;
                             var attackRecord = new Attack({
                                 game: self.gameId,
-                                type: "BOMB HIT",
+                                type: "BOMB HIT PLAYER",
                                 owner: bomb.owner.username,
                                 target: playEnt.username,
                                 x: bomb.getX(),
                                 y: bomb.getY()
                             });
+                            attackRecord.save(function(err){
+                                if (err){
+                                    console.log('save err', err)
+                                }else{
+                                    console.log('saved attack record');
+                                }
+                            });
+
                         }
                     });
+                    self.AAbatterys.forEach(function(aaBattery){
+                        var distanceVector = Vector.sub(bomb.getPosition(), aaBattery.physical.position);
+                        console.log('distanceVector bomb, playEnt', distanceVector);
+                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
+                        console.log('distanceVector bomb, playEnt', distanceSq);
+                        if (distanceSq < bomb.blast_radius){
+                            console.log('hit');
+                            aaBattery.health -= bomb.damage;
+                            var attackRecord = new Attack({
+                                game: self.gameId,
+                                type: "BOMB HIT AA_TANK",
+                                owner: bomb.owner.username,
+                                target: aaBattery.owner.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
+                            attackRecord.save(function(err){
+                                if (err){
+                                    console.log('save err', err)
+                                }else{
+                                    console.log('saved attack record');
+                                }
+                            });
+
+                        }
+                    });
+
                 //    remove bomb
 
                     self.bombs.splice(i, 1);
@@ -406,8 +442,7 @@ var gameFactory = function(id, socketHandler){
             // console.log('engine update over', this.renderTime);
 
             if (this.renderTime>RENDER_TIME){
-                console.log('engine timestamp',engine.timing.timestamp);
-                // this.arena.render();
+                // console.log('engine timestamp',engine.timing.timestamp);
                 // console.log('rendering');
                 var assets = [];
                 this.flaks.forEach(function(flak){
@@ -443,7 +478,10 @@ var gameFactory = function(id, socketHandler){
                 //
                 //
                 // }
-                self.socketHandler.sendGameState({players: playerStates, assets: assets});
+                nextState.players = playerStates;
+                nextState.assets = assets;
+                self.socketHandler.sendGameState(nextState);
+                nextState = {};
             }
             if (this.running){
                 debug("running is true");
@@ -471,6 +509,20 @@ var gameFactory = function(id, socketHandler){
                                 proj.mapsToMetres(input.destination);
                                 console.log('target after conversion: ', input.destination);
                                 BatteryFactory.newBattery(playEnt, self).addDestination(input.destination.x, input.destination.y);
+                            }
+                        }else if (input.action === 'BUY_BOMBER'){
+                            console.log('BUY_BOMBER', playEnt.username, playEnt.money);
+                            if((playEnt.money > 30) && playEnt.state === 'living'){
+                                playEnt.bomber_ready ++;
+                                playEnt.money -= 30;
+
+                            }
+                        }
+                        else if (input.action === 'BUY_AA'){
+                            if((playEnt.money > 30) && playEnt.state === 'living'){
+                                playEnt.battery_ready ++;
+                                playEnt.money -= 30;
+
                             }
                         }
                         self.inputs.splice(index, 1); //remove input after its taken care of

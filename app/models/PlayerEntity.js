@@ -17,6 +17,8 @@ exports.newPlayer = function(x, y, player, game){
         physical: Bodies.rectangle(x, y, 10, 10),
         health: 100,
         playing : true,
+        money:30,
+        moneyRate: 0.05,
         points: 0,
         state: 'living',
         lat: x,
@@ -33,6 +35,7 @@ exports.newPlayer = function(x, y, player, game){
             if (self.health < 0){
                 this.state = 'wounded';
             }
+            self.money += (self.moneyRate*dt)/1000;
         },
         getX: function(){
             return this.physical.position.x;
@@ -58,8 +61,11 @@ exports.newPlayer = function(x, y, player, game){
         playerState.health = this.health;
         playerState.bomber_ready = this.bomber_ready;
         playerState.bomber_in_action = this.bomber_in_action;
+        playerState.AA_ready = this.battery_ready;
+        playerState.AA_deployed = this.battery_in_action;
         playerState.x = newPLayer.getX();
         playerState.y = newPLayer.getY();
+        playerState.money = Math.floor(newPLayer.money);
         return playerState;
     };
     newPLayer.getState = getState;
