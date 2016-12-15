@@ -21,6 +21,7 @@ exports.newBattery = function(playerEntity, game){
         state : 'move',
         owner: playerEntity,
         range : 500,
+        health: 60,
         running : true,
         accuracy: 30,
         line_of_sight : 500, // no idea of the scale here, guessing
@@ -55,7 +56,7 @@ exports.newBattery = function(playerEntity, game){
             var normal = Vector.normalise(posToDestination);
             // console.log('normal', normal);
             var velocity = Vector.mult(normal, 10);
-            Vector.add(velocity, Vector.create(Math.random(), Math.random()));
+            Vector.add(velocity, Vector.create(Math.random()*10, Math.random()*10));
             var flak = Flak.newFlak(this.getX(), this.getY(), velocity, game, self.owner);
             game.addFlak(flak);
             console.log("flak added");
