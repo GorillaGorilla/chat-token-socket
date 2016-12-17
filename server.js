@@ -11,11 +11,13 @@ var express     = require('express'),
     db          = require('./config/mongoose.js')(),
     passport	= require('passport'),
     jwt         = require('jwt-simple'),
+    cors = require('cors'),
     cfenv = require('cfenv'),
-    controller = require("./app/routes/auth.server.controller.js"),
+    controller = require("./app/controllers/auth.server.controller.js"),
     server = require('http').createServer(app),
     io = require('socket.io')(server),
-    transport = require('./config/transportsecurity');
+    transport = require('./config/transportsecurity'),
+    Attack = require('./app/controllers/survey.server.controller');
 
 
 var allowCrossDomain = function(req, res, next) {
@@ -31,6 +33,8 @@ if (process.env.NODE_ENV === 'development'){
     // app.use(compress());
     app.use(transport.httpsEnforce);
 }
+
+app.use(cors());
 
 // get our request parameters7
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -62,6 +66,12 @@ apiRoutes.get('/users', passport.authenticate('jwt', { session: false}), functio
     console.log('protected route');
     res.send('protected route');
 });
+
+apiRoutes.get('/progress', Attack.list, Attack.returnList);
+
+apiRoutes.get('/progress/:gameId', Attack.list, Attack.filterByGame, Attack.returnList);
+
+apiRoutes.param('gameId', Attack.gameId);
 
 // connect the api routes under /api/*
 app.use('/api', apiRoutes);

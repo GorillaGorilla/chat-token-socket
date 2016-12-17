@@ -8,7 +8,7 @@ var Responder = require('mongoose').model('Responder'),
     jsonWebToken = require('jsonwebtoken'),
     config = require("../../config/config.js"),
     UUID = require('node-uuid'),
-    GameServer = require('../controllers/game_server.server');
+    GameServer = require('./game_server.server.js');
 
 
 
