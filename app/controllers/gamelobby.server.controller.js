@@ -5,7 +5,7 @@
 var UUID = require('node-uuid');
 var GameServer = require('./game_server.server.js');
 var debug = require('debug'),
-    UserController = require('auth.server.controller.js');
+    UserController = require('./auth.server.controller.js');
 
 // total number of players across all games (including disconnected ones???)
 var numUsers = 0;
