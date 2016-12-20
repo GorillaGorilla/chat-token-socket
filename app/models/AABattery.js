@@ -64,6 +64,7 @@ exports.newBattery = function(playerEntity, game){
         update : function(dt){
             var self = this;
             if (self.health <= 0){
+                self.owner.battery_in_action --;
                 return self.running = false;
             }
             if(timeToFire > 0){

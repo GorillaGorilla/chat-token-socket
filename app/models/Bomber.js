@@ -49,6 +49,7 @@ exports.newBomber = function(playerEntity, game){
         update : function(dt){
             var self = this;
             if (self.health <= 0){
+                self.owner.bomber_in_action --;
                 return self.running = false;
             }
             // if (this.lastPos.x && this.lastDt){

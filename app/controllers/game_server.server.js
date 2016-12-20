@@ -195,6 +195,9 @@ var gameFactory = function(id, socketHandler){
 
     var nextState = {};  //variable to queue up things that need to be sent in the next rendering/synch event
 
+    var moneyUpdate = 100000;
+    var moneyUpdateTime = 100000;
+
     return {
         gameId: id,
         socketHandler: socketHandler,
@@ -406,13 +409,21 @@ var gameFactory = function(id, socketHandler){
             self.handleInputs();
             // scale dt to slow down game. Remember to put it back for rendering
             dt = dt;
+            moneyUpdate -= dt;
             // console.log('dt', dt);
             self.handleLocations();
             self.updateBombs(dt);
             self.updateFlaks(dt);
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
+                if(moneyUpdate<0 && ent.state !== 'wounded'){
+                    ent.money += ent.moneyRate*moneyUpdateTime/5000;
+                }
             });
+
+            if(moneyUpdate<0){
+                moneyUpdate = Number(String(moneyUpdateTime));
+            }
             self.bombers.forEach(function(bomber, index){
                 if (bomber.running){
                     bomber.update(dt);
@@ -518,8 +529,8 @@ var gameFactory = function(id, socketHandler){
 
                             }
                         }
-                        else if (input.action === 'BUY_AA'){
-                            if((playEnt.money > 30) && playEnt.state === 'living'){
+                        else if (input.action === 'BUY_AA' ){
+                            if((playEnt.money > 30) && playEnt.state === 'living' && (playEnt.battery_ready + playEnt.battery_in_action) < 9){
                                 playEnt.battery_ready ++;
                                 playEnt.money -= 30;
 

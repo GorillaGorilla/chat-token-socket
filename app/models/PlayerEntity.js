@@ -35,7 +35,7 @@ exports.newPlayer = function(x, y, player, game){
             if (self.health < 0){
                 this.state = 'wounded';
             }
-            self.money += (self.moneyRate*dt)/1000;
+            // self.money += (self.moneyRate*dt)/1000;
         },
         getX: function(){
             return this.physical.position.x;
