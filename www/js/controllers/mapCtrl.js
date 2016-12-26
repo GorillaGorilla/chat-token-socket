@@ -12,6 +12,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     latLng = Location.currentLocation(),
       locationQueued = false,
     playerState,
+      locationOveride = false,
     icons = {
         player: "img/player_icon.png",
         enemy: "img/colonel2.png",
@@ -19,6 +20,9 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
         AA_TANK: "img/AA_TANK.png",
         FLAK: "img/FLAK.png"
     };
+
+    var lat = 50.5 + Math.random()*2 - 1,
+        lng = 0.12 + Math.random()*2 -1;
     var locationEvent = function(){
         console.log('location', Location.getX(), Location.getY());
         Socket.emit('location', {gameId: UserGameIds.getGameId(), location: {username : UserGameIds.getUsername(), x : Location.getX(), y: Location.getY()}});
@@ -114,7 +118,8 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     // console.log('game state', state);
     $scope.score = state;
     render(state);
-    delayPositionCall();
+    if(!locationOveride){delayPositionCall();}
+
   });
 
   function render(state){
@@ -189,6 +194,29 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
 
     };
 
+    $scope.locationEvent = function(id){
+        console.log('location');
+        locationOveride = true;
+        Socket.emit('location', {gameId: UserGameIds.getGameId(), location: {username : UserGameIds.getUsername(), x : lat, y: lng}});
+    };
+
+
+    $scope.left = function(){
+        lat --;
+        // Socket.emit('gameInputMessage', {gameId: $scope.gameId, x : -1, y:0});
+    };
+    $scope.right = function(){
+        lat ++;
+        // Socket.emit('gameInputMessage', {gameId: $scope.gameId, x : 1, y:0});
+    };
+    $scope.up = function(){
+        lng ++;
+        // Socket.emit('gameInputMessage', {gameId: $scope.gameId, x : 0, y:1});
+    };
+    $scope.down = function(){
+        lng --;
+        // Socket.emit('gameInputMessage', {gameId: $scope.gameId, x : 0, y:-1});
+    };
 
 
   $scope.leaveGame = function(){

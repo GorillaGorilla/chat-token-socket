@@ -9,7 +9,9 @@ var
     Responder = require('mongoose').model('Responder'),
     socketioJwt = require('socketio-jwt'),
     jsonWebToken = require('jsonwebtoken'),
-    config = require('./config');
+    config = require('./config'),
+    Watson = require('./../app/controllers/watsonChat'),
+    Attack = require('./../app/controllers/attack.controller');
 
 // // run the engine
 // Engine.run(engine);
@@ -17,8 +19,9 @@ var
 // // run the renderer
 // Render.run(render);
 
+var messages = [
 
-
+];
 
 
 module.exports = function(io){
@@ -115,11 +118,45 @@ module.exports = function(io){
     io.on('authenticated', function (socket) {
         console.log('authenticated event arrived');
         // when the client emits 'new message', this listens and executes
+        socket.emit('existing messages', {messages: messages});
+
+
         socket.on('new message', function (data) {
+            console.log('new message data', data);
             // we tell the client to execute 'new message'
+
+            if(data.message.includes('watson') || data.message.includes('Watson')){
+                console.log('watson question detected');
+                Watson.passToWatson({text: data.message, context: null}, function(err, result){
+                    var msgs;
+                    if (result.raw.intents[0].intent === 'missedevents'){
+                        console.log('missed events intent');
+                        var player = GameServer.getPlayerEntity(socket.username);
+                        var dateFrom = new Date();
+                        dateFrom.setTime(dateFrom.getTime() - 3600000*4);
+                        Attack.getRecentAttacks({
+                            dateFrom : dateFrom,
+                            username: socket.username
+                        },function(err, result){
+                            if(err){return console.log(err);}
+
+
+                            msgs = Attack.formatAsMessages(result, socket.username);
+                            console.log('emitting messages all messages', msgs);
+                            socket.emit('all messages', {messages:msgs});
+                        } );
+
+                    }else{
+                        io.emit('new message', {message: result.chatResponse, username: 'Watson', context: result.context});
+                    }
+                });
+            }
+
+            messages.push({username: socket.username,
+                message: data.message});
             socket.broadcast.emit('new message', {
                 username: socket.username,
-                message: data
+                message: data.message
             });
         });
 
@@ -138,6 +175,11 @@ module.exports = function(io){
             socket.broadcast.emit('stop typing', {
                 username: socket.username
             });
+        });
+
+        socket.on('chat opened', function(){
+            console.log('chat opened');
+            socket.emit('all messages', {messages: messages})
         });
 
         // when the user disconnects.. perform this

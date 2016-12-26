@@ -1,7 +1,7 @@
 /**
  * Created by frederickmacgregor on 26/11/2016.
  */
-angular.module('login').service('Location',function($cordovaGeolocation){
+angular.module('login').service('Location',function($cordovaGeolocation, Projection){
   var lastLocation = null;
   var positionQueued = false;
 
@@ -18,6 +18,13 @@ angular.module('login').service('Location',function($cordovaGeolocation){
       }
 
     }, function(error){
+        var latLng = new google.maps.LatLng(50.5 + Math.random()*2 - 1, 0.12 + Math.random()*2 -1);
+
+        // alert('location gotten  ' + latLng.lat() + ' ' + latLng.lng());
+        lastLocation = latLng;
+        if(callback){
+            callback(null, lastLocation);
+        }
       console.log("Could not get location");
     });
   };
@@ -49,7 +56,7 @@ angular.module('login').service('Location',function($cordovaGeolocation){
   };
   getPosition();
   // setInterval()     //use this to update position? or set listener for change in position....
-    setInterval(getPosition, 60000);
+  //   setInterval(getPosition, 60000);
   return {
     currentLocation: currentLocation,
     getX : getX,

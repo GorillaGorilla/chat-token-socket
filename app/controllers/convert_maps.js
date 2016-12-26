@@ -26,7 +26,7 @@ exports.distanceBetweenMetres = function(p1, p2){
     console.log('diff d=vector',difference);
     var hyp = Math.sqrt(difference.x*difference.x + difference.y*difference.y);
     return hyp;
-}
+};
 
 exports.test = function(){
 
@@ -38,11 +38,5 @@ exports.test = function(){
     console.log('p after', p1);
     Proj4js.transform(dest, source, p1);
     console.log('and back: ', p1);
-
-
-
-
-
-
 
 };

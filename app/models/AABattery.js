@@ -8,7 +8,8 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body,
     Flak = require('./Flak'),
-    proj = require('../controllers/convert_maps');
+    proj = require('../controllers/convert_maps'),
+    UUID = require('node-uuid');
 
 exports.newBattery = function(playerEntity, game){
     // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb
@@ -16,6 +17,7 @@ exports.newBattery = function(playerEntity, game){
         timeToFire = 0,
         target = null;
     var battery = {
+        id: UUID(),
         physical: Bodies.rectangle(playerEntity.physical.position.x, playerEntity.physical.position.y, 10, 10),
         damage : 40,
         state : 'move',
@@ -57,7 +59,7 @@ exports.newBattery = function(playerEntity, game){
             // console.log('normal', normal);
             var velocity = Vector.mult(normal, 10);
             Vector.add(velocity, Vector.create(Math.random()*10, Math.random()*10));
-            var flak = Flak.newFlak(this.getX(), this.getY(), velocity, game, self.owner);
+            var flak = Flak.newFlak(this.getX(), this.getY(), velocity, game, self);
             game.addFlak(flak);
             console.log("flak added");
         },

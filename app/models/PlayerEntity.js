@@ -18,7 +18,7 @@ exports.newPlayer = function(x, y, player, game){
         health: 100,
         playing : true,
         money:30,
-        moneyRate: 0.05,
+        moneyRate: 0.005,
         points: 0,
         state: 'living',
         lat: x,

@@ -9,7 +9,7 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body;
 
-exports.newFlak = function(x, y, velocity, game, owner){
+exports.newFlak = function(x, y, velocity, game, parentBattery){
     var bomb = {
     };
     bomb.physical = Bodies.rectangle(x, y, 1, 1),
@@ -17,7 +17,8 @@ exports.newFlak = function(x, y, velocity, game, owner){
     bomb.fuse = 3000;  //seconds
     bomb.damage = 2;
     bomb.type = "FLAK";
-    bomb.owner = owner;
+    bomb.owner = parentBattery.owner;
+    bomb.firedBy = parentBattery;
     bomb.update = function(dt){
         console.log('flak update', bomb.fuse, dt, bomb.getX(), bomb.getY());
         bomb.fuse -= dt;

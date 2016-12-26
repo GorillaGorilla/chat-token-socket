@@ -5,7 +5,8 @@
 var UUID = require('node-uuid');
 var GameServer = require('./game_server.server.js');
 var debug = require('debug'),
-    UserController = require('./auth.server.controller.js');
+    UserController = require('./auth.server.controller.js'),
+    AttackCtrl = require('./attack.controller');
 
 // total number of players across all games (including disconnected ones???)
 var numUsers = 0;
@@ -52,6 +53,21 @@ module.exports = function(io, client) {
 
     });
 
+    client.on('request history', function(dat){
+        var player = GameServer.getPlayerEntity(client.username);
+        var dateFrom = new Date();
+        dateFrom.setHours(dateFrom.getTime() - 3600000*6);
+        AttackCtrl.getRecentAttacks({
+            dateFrom : dateFrom,
+            username: client.username
+        },function(err, result){
+            if(err){return console.log(err);}
+
+            AttackCtrl.formatAsMessages(result);
+
+        } )
+    });
+
     client.on('location', function(dat){
         console.log('location event',dat);
         GameServer.playerLocationUpdate(dat);
@@ -86,6 +102,8 @@ module.exports = function(io, client) {
     });
 
     client.on('disconnect', function() {
+        var play = GameServer.setDisconnectTime(client.username);
+        console.log('discon time',play.disconnectedAt);
         console.log('disconnect username', client.username);
 
     });
