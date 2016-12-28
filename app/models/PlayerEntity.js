@@ -8,6 +8,62 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body;
 
+var GameObject = require('./gameobject.class');
+
+class PlayerEntity extends GameObject {
+    constructor(x, y, player, game){
+        super(x, y);
+        this.username = player.username;
+        this.game = game;
+        this.playing = true;
+        this.money=50;
+        this.moneyRate= 0.005;
+        this.points= 0;
+        this.state= 'living';
+        this.lat= x;
+        this.lng= y;
+        this.bomber_ready= 1;
+        this.bomber_in_action= 0;
+        this.bombers= [];
+        this.battery_ready= 1;
+        this.battery_in_action= 0;
+        this.AAbatterys= [];
+
+        game.World.add(game.engine.world, this.physical);
+        this.physical.collisionFilter.group = -1;
+    }
+
+    get gameId(){
+        return this.game.gameId;
+    }
+
+    update(dt){
+        var self = this;
+        if (self.health < 0){
+            this.state = 'wounded';
+        }
+    }
+
+    returnBomber(bomber){
+        var self = this;
+        self.bomber_ready ++;
+        self.bomber_in_action --;
+        self.bombers.forEach(function(ent, i){
+            if (ent === bomber){
+                self.bombers.splice(i, 1);
+            }
+        });
+    }
+
+    sendBomberAccounting(bomber) {
+        this.bombers.push(bomber);
+        this.bomber_ready--;
+        this.bomber_in_action++;
+    }
+
+
+}
+
 exports.newPlayer = function(x, y, player, game){
 
     var newPLayer = {
@@ -88,6 +144,7 @@ exports.newPlayer = function(x, y, player, game){
     newPLayer.getState = getState;
     game.World.add(game.engine.world, newPLayer.physical);
     newPLayer.physical.collisionFilter.group = -1;
-    return newPLayer;
+    // return newPLayer;
 
+    return new PlayerEntity(x, y, player, game);
 };

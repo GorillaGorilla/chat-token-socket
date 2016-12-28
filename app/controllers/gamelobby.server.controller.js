@@ -6,7 +6,8 @@ var UUID = require('node-uuid');
 var GameServer = require('./game_server.server.js');
 var debug = require('debug'),
     UserController = require('./auth.server.controller.js'),
-    AttackCtrl = require('./attack.controller');
+    AttackCtrl = require('./attack.controller'),
+    proj = require('../controllers/convert_maps');
 
 // total number of players across all games (including disconnected ones???)
 var numUsers = 0;
@@ -66,6 +67,22 @@ module.exports = function(io, client) {
             AttackCtrl.formatAsMessages(result);
 
         } )
+    });
+
+    client.on('control point state', function(){
+        console.log('control point state');
+
+        var points = [];
+        // console.log('cp1',GameServer.getPlayerGame(client.username).controlPoints[0]);
+            GameServer.getPlayerGame(client.username).controlPoints.forEach(function(cp){
+                var clone = cp.createClone()
+                proj.metresToMaps(clone);
+                points.push(clone);
+            });
+            // console.log('cp2',GameServer.getPlayerGame(client.username).controlPoints[0]);
+
+
+        client.emit('control points', {points: points});
     });
 
     client.on('location', function(dat){

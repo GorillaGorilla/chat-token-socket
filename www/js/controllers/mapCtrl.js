@@ -8,6 +8,8 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
   console.log('loading map module');
   var options = {timeout: 10000, enableHighAccuracy: true},
     markers = [],
+      controlPoints = [],
+    cpMarkers = [],
       targetFinder = null,
     latLng = Location.currentLocation(),
       locationQueued = false,
@@ -34,7 +36,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
   $scope.playerHealth = 100;
   var mapOptions = {
     center: latLng,
-    zoom: 15,
+    zoom: 10,
     mapTypeId: google.maps.MapTypeId.ROADMAP
   };
 
@@ -134,6 +136,9 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
       });
       state.assets.forEach(function(asset){
           var assetLatLng = new google.maps.LatLng(asset.x, asset.y);
+          if (!asset.type && $scope.map.getZoom() <15){
+              return;
+          }
           addAsset(assetLatLng, asset.type);
       });
       targetFinder.setOptions({
@@ -148,6 +153,41 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
 
     }
   }
+
+    var cpState = false;
+
+
+  $scope.map.addListener('zoom_changed', function(){
+      console.log('zoom_changed');
+      if(cpMarkers.length === 0){
+          console.log('emitting request for cp state');
+          Socket.emit('control point state');
+          return;
+      }
+      console.log('$scope.map.getZoom()', $scope.map.getZoom(), cpState);
+      if ($scope.map.getZoom() >= 15 && cpState === false){
+          console.log('setting map true');
+          cpMarkers.forEach(function(mark){
+              mark.setMap($scope.map);
+          });
+          cpState = true;
+      }else if ($scope.map.getZoom() < 15 && cpState === true){
+          console.log('setting map false');
+          cpMarkers.forEach(function(mark){
+              mark.setMap(null);
+          });
+          cpState = false;
+      }
+  });
+
+  Socket.on('control points', function(data){
+      console.log('control points event', data);
+      controlPoints = data.points;
+      controlPoints.forEach((cp)=>{
+          var cpLatLng = new google.maps.LatLng(cp.x, cp.y);
+          addCP(cpLatLng)
+      });
+  });
 
   function renderPlayer(player){
     // console.log('render player');
@@ -172,6 +212,20 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     var marker = new google.maps.Marker(opts);
     markers.push(marker);
   }
+
+  function addCP(location, icon) {
+        //accepts a LatLng obj and a path to the correct icon image
+        var opts = {
+            position: location,
+            map: null
+        };
+        if (icon){
+            opts.icon = icon;
+        }
+        var marker = new google.maps.Marker(opts);
+        cpMarkers.push(marker);
+  }
+
 
   function addAsset(location, type){
     var image = icons[type];
@@ -224,5 +278,10 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     Socket.removeListener('gameState');
     AuthService.logout();
   };
+
+    function showDistance(n){
+        "use strict";
+        return roundNumber(n/1e3,5)+" km ("+roundNumber(kmToMiles(n/1e3),5)+" miles)"
+    }
 
 });

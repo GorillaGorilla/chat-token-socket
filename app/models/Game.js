@@ -16,6 +16,8 @@ var proj = require('../controllers/convert_maps'),
     BatteryFactory = require('./AABattery');
     // Attack = require('mongoose').model('Attack');
 
+var ControlPoint = require('./controlpoint.class');
+
 var requestUpdateFrame;
 var RENDER_TIME = 200,
     game;
@@ -40,20 +42,19 @@ requestUpdateFrame = function (game,  callback, AttackCtrl) {
     return id;
 };
 
-var pointsOfInterest = [
-    {x: 50.796647, y: -2.075390,type: "CONTROL POINT", owner : null}
-],
+var pointsOfInterest = require('./controlpoints'),
 hospitals = [
     {x: 50.796647, y: -2.065390,type: "HOSPITAL", owner : null}
 ];
 
+var controlPoints =  [];
+
 pointsOfInterest.forEach(function(poi){
     proj.mapsToMetres(poi);
-    poi.position = Vector.create(poi.x, poi.y);
-    poi.getPosition = function(){
-        return poi.position;
-    }
+   controlPoints.push(new ControlPoint(poi.x, poi.y));
 });
+
+console.log('controlPoints', controlPoints);
 
 hospitals.forEach(function(poi){
     proj.mapsToMetres(poi);
@@ -107,9 +108,9 @@ exports.create = function(id, socketHandler, dbHandler){
     var checkCollisions = function(point1, point2, distance){
     //    return true or false
         var distanceVector = Vector.sub(point1, point2);
-        console.log('distanceVector checkCOllision method', distanceVector);
+        // console.log('distanceVector checkCOllision method', distanceVector);
         var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-        console.log('distanceVector distanceSq checkCollision method', distanceSq);
+        // console.log('distanceVector distanceSq checkCollision method', distanceSq);
         return distanceSq < (distance*distance)
 
     };
@@ -136,6 +137,7 @@ exports.create = function(id, socketHandler, dbHandler){
     };
 
     var render = function(){
+        // console.log('render called');
         var assets = [];
         game.flaks.forEach(function(flak){
             var flakState = flak.getState();
@@ -154,11 +156,19 @@ exports.create = function(id, socketHandler, dbHandler){
         });
         var playerStates = [];
         game.playerEntities.forEach(function(entity){
-            var entityState = entity.getState();
+            var entityState = entity.createClone();
+            entityState.money = Math.floor(entityState.money);
+            // console.log('entity clone', entityState);
             proj.metresToMaps(entityState);
             playerStates.push(entityState);
 
         });
+        // game.controlPoints.forEach(function(entity){  //too many to update constantly...
+        //     var entityState = entity.createClone();
+        //     // console.log('controlPoint clone', entityState);
+        //     proj.metresToMaps(entityState);
+        //     assets.push(entityState);
+        // });
         // console.log('assets created');
         game.renderTime = 0;
         nextState.players = playerStates;
@@ -204,6 +214,7 @@ exports.create = function(id, socketHandler, dbHandler){
         bombers: [],
         AAbatterys: [],
         playerEntities: [],
+        controlPoints: controlPoints,
         bombs : [],
         flaks : [],
         getPlayerEntity: function(username){
@@ -241,7 +252,7 @@ exports.create = function(id, socketHandler, dbHandler){
                         }
                     });
                     self.AAbatterys.forEach(function(aaBattery){
-                        if (checkCollisions(bomb.getPosition(), aaBattery.physical.position, bomb.blast_radius)){
+                        if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
                             console.log('hit');
                             aaBattery.health -= bomb.damage;
                             AttackCtrl.saveAttack({
@@ -262,6 +273,34 @@ exports.create = function(id, socketHandler, dbHandler){
                                     asset: bomb.droppedBy.id,
                                     x: aaBattery.getX(),
                                     y: aaBattery.getY()
+                                });
+
+                            }
+
+                        }
+                    });
+
+                    self.controlPoints.forEach(function(cp){
+                        if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
+                            console.log('hit');
+                            cp.health -= bomb.damage;
+                            AttackCtrl.saveAttack({
+                                game: self.gameId,
+                                type: "BOMB HIT CONTROL POINT",
+                                owner: bomb.owner.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
+
+                            if (cp.health <= 0){
+                                cp.health = 0;
+                                AttackCtrl.saveAttack({
+                                    game: self.gameId,
+                                    type: "CONTROL POINT DESTROYED",
+                                    owner: bomb.owner.username,
+                                    asset: bomb.droppedBy.id,
+                                    x: cp.getX(),
+                                    y: cp.getY()
                                 });
 
                             }
@@ -403,6 +442,9 @@ exports.create = function(id, socketHandler, dbHandler){
             });
 
             if(moneyUpdate<0){
+                self.controlPoints.forEach(function(cp){
+                    cp.update(moneyUpdateTime/5000);
+                });
                 moneyUpdate = Number(String(moneyUpdateTime));
             }
             self.bombers.forEach(function(bomber, index){
@@ -424,9 +466,9 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.AAbatterys.splice(index,1);
                 }
             });
-            console.log('----- Before Engine Update',Date.now());
+            // console.log('----- Before Engine Update',Date.now());
             Engine.update(engine, dt);
-            console.log('----- engine update over', Date.now());
+            // console.log('----- engine update over', Date.now());
             // dt = dt/1000;
             this.renderTime += dt;
             // console.log('update: this.renderTime', this.renderTime);
@@ -479,7 +521,6 @@ exports.create = function(id, socketHandler, dbHandler){
                         self.inputs.splice(index, 1); //remove input after its taken care of
                     });
             });
-
         },
         handleLocations: function(){
             var self = this;
@@ -490,8 +531,9 @@ exports.create = function(id, socketHandler, dbHandler){
                     proj.mapsToMetres(self.new_locations[playEnt.username]);
                     // console.log('proj.x', self.new_locations[playEnt.userId].x);
                     playEnt.setPosition(self.new_locations[playEnt.username].x, self.new_locations[playEnt.username].y);
-                    checkVicinityInterestPoint(playEnt);
-                    checkVicinityHospital(playEnt);
+                    self.controlPoints.forEach(function(cp){
+                        cp.capture(playEnt);
+                    });
                     self.new_locations[playEnt.username] = null;
                 }
             })
@@ -505,7 +547,12 @@ exports.create = function(id, socketHandler, dbHandler){
             this.socketHandler.addPlayer(player);
             // this.arena.addPlayer(player);
             var newPlayerEntity = PlayerFactory.newPlayer(this.playerEntities.length +1, this.playerEntities.length +1, player, this);
-
+            var cpClones = [];
+            this.controlPoints.forEach((cp)=>{
+                proj.metresToMaps(cp);
+                cpClones.push(cp.createClone());
+            });
+            this.socketHandler.emit(player.username, 'control points', {points : cpClones});
             this.playerEntities.push(newPlayerEntity);
             player.game = this;
             this.playerCount ++;
@@ -543,6 +590,8 @@ exports.create = function(id, socketHandler, dbHandler){
 
         }
     };
+
+
 
     return game;
 };

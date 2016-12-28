@@ -37,9 +37,9 @@ class GameObject {
     checkCollisionObj (gameObj, distance){
         //    return true or false
         var distanceVector = Vector.sub(this.getPosition(), gameObj.getPosition());
-        console.log('distanceVector checkCOllision method', distanceVector);
+        // console.log('distanceVector checkCOllision method', distanceVector);
         var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-        console.log('distanceVector distanceSq checkCollision method', distanceSq);
+        // console.log('distanceVector distanceSq checkCollision method', distanceSq);
         return distanceSq < (distance*distance)
 
     }
@@ -47,9 +47,9 @@ class GameObject {
     checkCollisionPoint (vector, distance){
         //    return true or false
         var distanceVector = Vector.sub(this.getPosition(), vector);
-        console.log('distanceVector checkCOllision method', distanceVector);
+        // console.log('distanceVector checkCOllision method', distanceVector);
         var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-        console.log('distanceVector distanceSq checkCollision method', distanceSq);
+        // console.log('distanceVector distanceSq checkCollision method', distanceSq);
         return distanceSq < (distance*distance)
 
     }
@@ -57,7 +57,7 @@ class GameObject {
     createClone(){
         var clone = {};
         for( var att in this){
-            if(att !== 'physical' && att !== 'owner' && att !== 'game' && att !== 'routine'){
+            if(att !== 'physical' && att !== 'owner' && att !== 'game' && att !== 'routine'&& att !== 'AAbatterys' && att !== 'bombers'){
                 clone[att] = this[att];
             }
         }

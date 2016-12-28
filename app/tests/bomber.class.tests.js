@@ -33,6 +33,7 @@ var fakeOwner,
 describe('Testing Bomberclass', function() {
     beforeEach(function () {
         fakeOwner = PlayerFactory.newPlayer(x, y, fakePlayer, game);
+        // console.log('fakeOwner.createClone', fakeOwner.createClone());
         bomber = new Bomber(fakeOwner, game);
         obj = new GameObject(20, 20);
     });
@@ -82,6 +83,15 @@ describe('Testing Bomberclass', function() {
         game.bombs.should.have.length(0);
         bomber.dropBomb();
         game.bombs.should.have.length(1);
+    });
+
+    it('should be able to set a target', function () {
+        bomber.setTarget(30, 15);
+        bomber.update(1);
+        console.log('bomber.getX', bomber.getX());
+        bomber.physical.velocity.x.should.equal(0.3);
+        bomber.physical.velocity.y.should.equal(0);
+
     });
 
 
