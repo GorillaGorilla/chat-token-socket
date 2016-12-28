@@ -5,17 +5,17 @@ var Proj4js = require('proj4');
 
 var source = new Proj4js.Proj('EPSG:4326');    //source coordinates will be in Longitude/Latitude, WGS84
 var dest = new Proj4js.Proj('EPSG:3785');     //destination coordinates in meters, global spherical mercators projection, see http://spatialreference.org/ref/epsg/3785/
-
+var factor = 10;
 
 exports.mapsToMetres = function(objWithxy){
     Proj4js.transform(source, dest, objWithxy);
-    objWithxy.x = objWithxy.x/10;
-    objWithxy.y = objWithxy.y/10;
+    objWithxy.x = objWithxy.x/factor ;
+    objWithxy.y = objWithxy.y/factor;
 };
 
 exports.metresToMaps = function(objWithxy){
-    objWithxy.x = objWithxy.x*10;
-    objWithxy.y = objWithxy.y*10;
+    objWithxy.x = objWithxy.x*factor;
+    objWithxy.y = objWithxy.y*factor;
     Proj4js.transform(dest, source, objWithxy);
 };
 

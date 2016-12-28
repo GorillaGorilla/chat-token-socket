@@ -29,6 +29,6 @@ describe('testing the conversion from LatLng into metres',function(){
 
 
 
-})
+});
 
 

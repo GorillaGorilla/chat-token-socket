@@ -65,3 +65,16 @@ function writeMessageBomberDestroyedString(att, username){
     result = {username: 'Game', message: result};
     return result;
 };
+
+
+exports.saveAttack = function(obj){
+    var attackRecord = new Attack(obj);
+    attackRecord.save(function(err){
+        if (err){
+            console.log('save err', err)
+        }else{
+            console.log('saved attack record');
+        }
+    });
+
+};

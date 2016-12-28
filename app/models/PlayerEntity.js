@@ -48,8 +48,25 @@ exports.newPlayer = function(x, y, player, game){
         },
         getPosition : function () {
             return this.physical.position;
+        },
+        returnBomber : function(bomber){
+            var self = this;
+            self.bomber_ready ++;
+            self.bomber_in_action --;
+            self.bombers.forEach(function(ent, i){
+                if (ent === bomber){
+                    self.bombers.splice(i, 1);
+                }
+            });
+        },
+        sendBomberAccounting : function(bomber){
+            this.bombers.push(bomber);
+            this.bomber_ready --;
+            this.bomber_in_action ++;
         }
     };
+
+
 
     var getState = function(){
         // cannot attach physical, gives circular reference when attempting to emit this obh=j.

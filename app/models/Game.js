@@ -13,16 +13,16 @@ var proj = require('../controllers/convert_maps'),
     Body =  Matter.Body,
     PlayerFactory = require('./PlayerEntity'),
     BomberFactory = require('./Bomber'),
-    BatteryFactory = require('./AABattery'),
-    Attack = require('mongoose').model('Attack'),
-    AttackCtrl = require('../controllers/attack.controller');
+    BatteryFactory = require('./AABattery');
+    // Attack = require('mongoose').model('Attack');
 
 var requestUpdateFrame;
-var RENDER_TIME = 200;
+var RENDER_TIME = 200,
+    game;
 
 var lastTime = 0;
 var frame_time = 45000000;
-requestUpdateFrame = function (game,  callback) {
+requestUpdateFrame = function (game,  callback, AttackCtrl) {
     // debug('RequestUpdateFrame called');
     // debug('lastTime', lastTime);
     var currTime = getNanoTime(),
@@ -40,7 +40,30 @@ requestUpdateFrame = function (game,  callback) {
     return id;
 };
 
-exports.create = function(id, socketHandler){
+var pointsOfInterest = [
+    {x: 50.796647, y: -2.075390,type: "CONTROL POINT", owner : null}
+],
+hospitals = [
+    {x: 50.796647, y: -2.065390,type: "HOSPITAL", owner : null}
+];
+
+pointsOfInterest.forEach(function(poi){
+    proj.mapsToMetres(poi);
+    poi.position = Vector.create(poi.x, poi.y);
+    poi.getPosition = function(){
+        return poi.position;
+    }
+});
+
+hospitals.forEach(function(poi){
+    proj.mapsToMetres(poi);
+    poi.position = Vector.create(poi.x, poi.y);
+    poi.getPosition = function(){
+        return poi.position;
+    }
+});
+
+exports.create = function(id, socketHandler, dbHandler){
     var socketHandler = socketHandler || {
             players: {},
             addPlayer : function(player){
@@ -80,6 +103,69 @@ exports.create = function(id, socketHandler){
         });
         return playerEntity;
     };
+
+    var checkCollisions = function(point1, point2, distance){
+    //    return true or false
+        var distanceVector = Vector.sub(point1, point2);
+        console.log('distanceVector checkCOllision method', distanceVector);
+        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
+        console.log('distanceVector distanceSq checkCollision method', distanceSq);
+        return distanceSq < (distance*distance)
+
+    };
+
+    var checkVicinityInterestPoint = function(playEnt){
+        var point;
+        pointsOfInterest.forEach(function(poi){
+            if (checkCollisions(playEnt.getPosition(), poi.getPosition(), 30)){
+                poi.owner = playEnt;
+                point = poi;
+            };
+        });
+        return point;
+    };
+
+    var checkVicinityHospital = function(playEnt){
+        var point;
+        pointsOfInterest.forEach(function(hosp){
+            if (checkCollisions(playEnt.getPosition(), hosp.getPosition(), 30)){
+                playEnt.state = 'healing';
+            };
+        });
+        return true;
+    };
+
+    var render = function(){
+        var assets = [];
+        game.flaks.forEach(function(flak){
+            var flakState = flak.getState();
+            proj.metresToMaps(flakState);
+            assets.push(flakState);
+        });
+        game.AAbatterys.forEach(function(battery){
+            var batteryState = battery.getState();
+            proj.metresToMaps(batteryState);
+            assets.push(batteryState);
+        });
+        game.bombers.forEach(function(bomber){
+            var bomberState = bomber.createClone();
+            proj.metresToMaps(bomberState);
+            assets.push(bomberState);
+        });
+        var playerStates = [];
+        game.playerEntities.forEach(function(entity){
+            var entityState = entity.getState();
+            proj.metresToMaps(entityState);
+            playerStates.push(entityState);
+
+        });
+        // console.log('assets created');
+        game.renderTime = 0;
+        nextState.players = playerStates;
+        nextState.assets = assets;
+        game.socketHandler.sendGameState(nextState);
+        nextState = {};
+    };
     // if (process.env.NODE_ENV === 'test'){
     //     socketHandler.emit = function(id, event, msg){
     //         console.log(Date.now());
@@ -99,7 +185,7 @@ exports.create = function(id, socketHandler){
     var moneyUpdate = 100000;
     var moneyUpdateTime = 100000;
 
-    return {
+    game =  {
         gameId: id,
         socketHandler: socketHandler,
         running : false,
@@ -140,14 +226,10 @@ exports.create = function(id, socketHandler){
                     console.log('x', bomb.getX());
                     console.log('y', bomb.getY());
                     self.playerEntities.forEach(function(playEnt){
-                        var distanceVector = Vector.sub(bomb.getPosition(), playEnt.physical.position);
-                        console.log('distanceVector bomb, playEnt', distanceVector);
-                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-                        console.log('distanceVector bomb, playEnt', distanceSq);
-                        if (distanceSq < bomb.blast_radius){
+                        if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
                             console.log('hit');
                             playEnt.health -= bomb.damage;
-                            var attackRecord = new Attack({
+                            AttackCtrl.saveAttack({
                                 game: self.gameId,
                                 type: "BOMB HIT PLAYER",
                                 owner: bomb.owner.username,
@@ -155,25 +237,14 @@ exports.create = function(id, socketHandler){
                                 x: bomb.getX(),
                                 y: bomb.getY()
                             });
-                            attackRecord.save(function(err){
-                                if (err){
-                                    console.log('save err', err)
-                                }else{
-                                    console.log('saved attack record');
-                                }
-                            });
 
                         }
                     });
                     self.AAbatterys.forEach(function(aaBattery){
-                        var distanceVector = Vector.sub(bomb.getPosition(), aaBattery.physical.position);
-                        console.log('distanceVector bomb, playEnt', distanceVector);
-                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-                        console.log('distanceVector bomb, playEnt', distanceSq);
-                        if (distanceSq < bomb.blast_radius){
+                        if (checkCollisions(bomb.getPosition(), aaBattery.physical.position, bomb.blast_radius)){
                             console.log('hit');
                             aaBattery.health -= bomb.damage;
-                            var attackRecord = new Attack({
+                            AttackCtrl.saveAttack({
                                 game: self.gameId,
                                 type: "BOMB HIT MOBILE AA",
                                 owner: bomb.owner.username,
@@ -181,16 +252,9 @@ exports.create = function(id, socketHandler){
                                 x: bomb.getX(),
                                 y: bomb.getY()
                             });
-                            attackRecord.save(function(err){
-                                if (err){
-                                    console.log('save err', err)
-                                }else{
-                                    console.log('saved attack record');
-                                }
-                            });
 
                             if (aaBattery.health <= 0){
-                                var destroyedRecord = new Attack({
+                                AttackCtrl.saveAttack({
                                     game: self.gameId,
                                     type: "MOBILE AA DESTROYED",
                                     owner: bomb.owner.username,
@@ -198,13 +262,6 @@ exports.create = function(id, socketHandler){
                                     asset: bomb.droppedBy.id,
                                     x: aaBattery.getX(),
                                     y: aaBattery.getY()
-                                });
-                                destroyedRecord.save(function(err){
-                                    if (err){
-                                        console.log('save err', err)
-                                    }else{
-                                        console.log('saved aa destroyed record');
-                                    }
                                 });
 
                             }
@@ -226,47 +283,28 @@ exports.create = function(id, socketHandler){
                 if (flak.state === 'live'){
                     flak.update(dt);
                     self.bombers.forEach(function(bomber){
-                        var distanceVector = Vector.sub(flak.getPosition(), bomber.physical.position);
-                        console.log('distanceVector flak, playEnt', distanceVector);
-                        var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-                        console.log('distanceVector flak, playEnt', distanceSq);
-                        if (distanceSq < 300){
+                        if (checkCollisions(flak.getPosition(), bomber.physical.position, 10)){
                             console.log('hit');
                             bomber.health -= flak.damage;
-                            var attackRecord = new Attack({
+                            AttackCtrl.saveAttack({
                                 game: self.gameId,
                                 type: "FLAK HIT",
                                 owner: flak.owner.username,
                                 target: bomber.owner.username,
-                                x: flak.getX(),
-                                y: flak.getY()
-                            });
-                            attackRecord.save(function(err){
-                                if (err){
-                                    console.log('save err', err)
-                                }else{
-                                    console.log('saved attack record');
-                                }
+                                x: flak.getX().toFixed(3),
+                                y: flak.getY().toFixed(3)
                             });
 
                             if (bomber.health <= 0){
-                                var downedRecord = new Attack({
+                                AttackCtrl.saveAttack({
                                     game: self.gameId,
                                     type: "BOMBER DESTROYED",
                                     owner: flak.owner.username,
                                     target: bomber.owner.username,
                                     asset: flak.firedBy.id,
-                                    x: bomber.getX(),
-                                    y: bomber.getY()
+                                    x: bomber.getX().toFixed(3),
+                                    y: bomber.getY().toFixed(3)
                                 });
-                                downedRecord.save(function(err){
-                                    if (err){
-                                        console.log('save err', err)
-                                    }else{
-                                        console.log('saved bomber downed record');
-                                    }
-                                });
-
                             }
                             // remove flak from here, but also from Engine!
                             self.World.remove(engine.world, flak.physical);
@@ -386,55 +424,16 @@ exports.create = function(id, socketHandler){
                     self.AAbatterys.splice(index,1);
                 }
             });
-            // console.log('----- Before Engine Update',Date.now());
+            console.log('----- Before Engine Update',Date.now());
             Engine.update(engine, dt);
-            // console.log('----- engine update over', Date.now());
+            console.log('----- engine update over', Date.now());
             // dt = dt/1000;
             this.renderTime += dt;
             // console.log('update: this.renderTime', this.renderTime);
             // console.log('engine update over', this.renderTime);
 
             if (this.renderTime>RENDER_TIME){
-                // console.log('engine timestamp',engine.timing.timestamp);
-                // console.log('rendering');
-                var assets = [];
-                this.flaks.forEach(function(flak){
-                    var flakState = flak.getState();
-                    proj.metresToMaps(flakState);
-                    assets.push(flakState);
-                });
-                this.AAbatterys.forEach(function(battery){
-                    var batteryState = battery.getState();
-                    proj.metresToMaps(batteryState);
-                    assets.push(batteryState);
-                });
-                this.bombers.forEach(function(bomber){
-                    var bomberState = bomber.getState();
-                    proj.metresToMaps(bomberState);
-                    assets.push(bomberState);
-                });
-                var playerStates = [];
-                this.playerEntities.forEach(function(entity){
-                    var entityState = entity.getState();
-                    proj.metresToMaps(entityState);
-                    playerStates.push(entityState);
-
-                });
-                // console.log('assets created');
-                this.renderTime = 0;
-                // for (playerId in this.players){ // ^^2
-                //     debug('player', playerId);
-                //     // console.log('assets', assets);
-                //     // console.log('playerStates', playerStates);
-                //     console.log('emitting to: ', this.players[playerId].username);
-                //     self.players[playerId].emit('gameState', {players: playerStates, assets: assets});//^^3
-                //
-                //
-                // }
-                nextState.players = playerStates;
-                nextState.assets = assets;
-                self.socketHandler.sendGameState(nextState);
-                nextState = {};
+                render();
             }
             if (this.running){
                 debug("running is true");
@@ -448,13 +447,12 @@ exports.create = function(id, socketHandler){
                     return (input.username === playEnt.username);
                 })
                     .forEach(function(input, index, obj){
-
                         if (input.action === 'SEND_BOMBER') {
                             if (playEnt.bomber_ready > 0 && playEnt.state === 'living') {
                                 console.log('playEnt has bomber_ready > 0', input.target);
                                 proj.mapsToMetres(input.target);
                                 console.log('target after conversion: ', input.target);
-                                BomberFactory.newBomber(playEnt, self).addTarget(input.target.x, input.target.y);
+                                BomberFactory.newBomber(playEnt, self).setTarget(input.target.x, input.target.y);
                             }
                         } else if(input.action === 'SEND_BATTERY'){
                             if (playEnt.battery_ready > 0 && playEnt.state === 'living') {
@@ -479,7 +477,6 @@ exports.create = function(id, socketHandler){
                             }
                         }
                         self.inputs.splice(index, 1); //remove input after its taken care of
-
                     });
             });
 
@@ -493,10 +490,11 @@ exports.create = function(id, socketHandler){
                     proj.mapsToMetres(self.new_locations[playEnt.username]);
                     // console.log('proj.x', self.new_locations[playEnt.userId].x);
                     playEnt.setPosition(self.new_locations[playEnt.username].x, self.new_locations[playEnt.username].y);
+                    checkVicinityInterestPoint(playEnt);
+                    checkVicinityHospital(playEnt);
                     self.new_locations[playEnt.username] = null;
                 }
             })
-
         },
         pause : function(){this.running =false;},
 
@@ -544,7 +542,9 @@ exports.create = function(id, socketHandler){
         stop : function () {
 
         }
-    }
+    };
+
+    return game;
 };
 
 
