@@ -135,11 +135,11 @@ exports.newBattery = function(playerEntity, game){
                 //    call this function off the game, which will have the flakFactory and return so nothing else happens
 
                     var distanceVector = Vector.sub(self.getPosition(), target.getPosition());
-                    console.log('distanceVector ', distanceVector);
+                    // console.log('distanceVector ', distanceVector);
                     var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-                    console.log('distanceVector bomb, playEnt', distanceSq);
+                    // console.log('distanceVector bomb, playEnt', distanceSq);
                     if (distanceSq < self.range*self.range){
-                        console.log('in range!  firing!');
+                        // console.log('in range!  firing!');
                         if (timeToFire <= 0){
                             timeToFire = Number(String(reloadTime));
                             return self.fire();
@@ -153,11 +153,11 @@ exports.newBattery = function(playerEntity, game){
                     })
                         .forEach(function(bomber){
                         var distanceVector = Vector.sub(self.getPosition(), bomber.getPosition());
-                        console.log('distanceVector ', distanceVector);
+                        // console.log('distanceVector ', distanceVector);
                         var distanceSq = Vector.magnitudeSquared(distanceVector) || 0.0001;
-                        console.log('distanceVector bomb, playEnt', distanceSq);
+                        // console.log('distanceVector bomb, playEnt', distanceSq);
                         if (distanceSq < self.line_of_sight*self.line_of_sight){
-                            console.log('found target');
+                            // console.log('found target');
                             target = bomber;
                         }
                     })
@@ -175,7 +175,7 @@ exports.newBattery = function(playerEntity, game){
                 Body.setVelocity(this.physical, Vector.create(0,0));
                 return true;
             }else {
-                console.log('-------------------- false ');
+                // console.log('-------------------- false ');
                 return false;
             }
         },
@@ -185,7 +185,7 @@ exports.newBattery = function(playerEntity, game){
                 &&  ((this.getY() - self.owner.getY())*(this.getY() - self.owner.getY()) < 10 )){
                 return true;
             }else {
-                console.log('-------------------- false ');
+                // console.log('-------------------- false ');
                 return false;
             }
         },
