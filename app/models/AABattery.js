@@ -217,8 +217,8 @@ exports.newBattery = function(playerEntity, game){
     game.World.add(game.engine.world, battery.physical);
     //update accounting for where the bomber is etc for easy access
     playerEntity.AAbatterys.push(battery);
-    playerEntity.battery_ready --;
-    playerEntity.battery_in_action ++;
+    playerEntity.AA_ready --;
+    playerEntity.AA_deployed ++;
     game.AAbatterys.push(battery);
     // make bomber non coloding with players or bombers
     battery.physical.collisionFilter.group = -1;

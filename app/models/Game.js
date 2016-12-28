@@ -497,7 +497,7 @@ exports.create = function(id, socketHandler, dbHandler){
                                 BomberFactory.newBomber(playEnt, self).setTarget(input.target.x, input.target.y);
                             }
                         } else if(input.action === 'SEND_BATTERY'){
-                            if (playEnt.battery_ready > 0 && playEnt.state === 'living') {
+                            if (playEnt.AA_ready > 0 && playEnt.state === 'living') {
                                 console.log('playEnt has battery_ready > 0', input.destination);
                                 proj.mapsToMetres(input.destination);
                                 console.log('target after conversion: ', input.destination);
@@ -512,8 +512,8 @@ exports.create = function(id, socketHandler, dbHandler){
                             }
                         }
                         else if (input.action === 'BUY_AA' ){
-                            if((playEnt.money >= 30) && playEnt.state === 'living' && (playEnt.battery_ready + playEnt.battery_in_action) < 9){
-                                playEnt.battery_ready ++;
+                            if((playEnt.money >= 30) && playEnt.state === 'living' && (playEnt.AA_ready + playEnt.AA_deployed) < 9){
+                                playEnt.AA_ready ++;
                                 playEnt.money -= 30;
 
                             }

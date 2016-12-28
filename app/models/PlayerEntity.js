@@ -24,9 +24,9 @@ class PlayerEntity extends GameObject {
         this.lng= y;
         this.bomber_ready= 1;
         this.bomber_in_action= 0;
-        this.bombers= [];
-        this.battery_ready= 1;
-        this.battery_in_action= 0;
+        this.bombers = [];
+        this.AA_ready = 1;
+        this.AA_deployed = 0;
         this.AAbatterys= [];
 
         game.World.add(game.engine.world, this.physical);
