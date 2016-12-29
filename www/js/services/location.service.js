@@ -42,7 +42,7 @@ angular.module('login').service('Location',function($cordovaGeolocation, Project
 
   var getX = function(){
     if (lastLocation){
-      return lastLocation.lat();
+      return lastLocation.lng();
     }
     console.log('no location');
 
@@ -50,7 +50,7 @@ angular.module('login').service('Location',function($cordovaGeolocation, Project
 
   var getY = function(){
     if(lastLocation){
-      return lastLocation.lng();
+      return lastLocation.lat();
     }
     console.log('no location');
   };

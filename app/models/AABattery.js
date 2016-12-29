@@ -106,19 +106,22 @@ exports.newBattery = function(playerEntity, game){
         goTo : function(x, y, entity){
             console.log('goTo called');
             console.log('update battery to point towards destination', this.owner.username)
-            return function(){
-                console.log('goTo ', x , y);
-                var self = entity;
-                var destination = Vector.create(x, y);
-                // console.log('destination', destination);
+            if (x && y){
+                return function(){
+                    // console.log('goTo ', x , y);
+                    var self = entity;
+                    var destination = Vector.create(x, y);
+                    // console.log('destination', destination);
 
-                var posTodestination = Vector.sub(destination, self.physical.position);
-                // console.log('posTodestination:', posTodestination);
-                // console.log('distanceSq', distanceSq);
-                var normal = Vector.normalise(posTodestination);
-                // console.log('normal', normal);
-                Body.setVelocity(self.physical, Vector.mult(normal, this.speed));
+                    var posTodestination = Vector.sub(destination, self.physical.position);
+                    // console.log('posTodestination:', posTodestination);
+                    // console.log('distanceSq', distanceSq);
+                    var normal = Vector.normalise(posTodestination);
+                    // console.log('normal', normal);
+                    Body.setVelocity(self.physical, Vector.mult(normal, this.speed));
+                }
             }
+
         },
         idle : function(){
             return function(){

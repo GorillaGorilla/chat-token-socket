@@ -54,7 +54,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     var obj = { gameId: UserGameIds.getGameId(),
       input:{username: UserGameIds.getUsername(),
         action: 'SEND_BOMBER',
-        target: {x: targetLatLng.lat(), y: targetLatLng.lng()}}};
+        target: {x: targetLatLng.lng(), y: targetLatLng.lat()}}};
     Socket.emit('gameInputMessage',obj);
   };
 
@@ -64,7 +64,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
         var obj = { gameId: UserGameIds.getGameId(),
             input:{username: UserGameIds.getUsername(),
                 action: 'SEND_BATTERY',
-                destination: {x: targetLatLng.lat(), y: targetLatLng.lng()}}};
+                destination: {x: targetLatLng.lng(), y: targetLatLng.lat()}}};
         Socket.emit('gameInputMessage',obj);
     };
 
@@ -135,7 +135,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
 
       });
       state.assets.forEach(function(asset){
-          var assetLatLng = new google.maps.LatLng(asset.x, asset.y);
+          var assetLatLng = new google.maps.LatLng(asset.y, asset.x);
           if (!asset.type && $scope.map.getZoom() <15){
               return;
           }
@@ -184,14 +184,14 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
       console.log('control points event', data);
       controlPoints = data.points;
       controlPoints.forEach((cp)=>{
-          var cpLatLng = new google.maps.LatLng(cp.x, cp.y);
+          var cpLatLng = new google.maps.LatLng(cp.y, cp.x);
           addCP(cpLatLng)
       });
   });
 
   function renderPlayer(player){
     // console.log('render player');
-    var tempLatLng = new google.maps.LatLng(player.x, player.y);
+    var tempLatLng = new google.maps.LatLng(player.y, player.x);
     if (player.username === UserGameIds.getUsername()){
 
       addMarker(tempLatLng, icons['player']);
@@ -251,7 +251,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     $scope.locationEvent = function(id){
         console.log('location');
         locationOveride = true;
-        Socket.emit('location', {gameId: UserGameIds.getGameId(), location: {username : UserGameIds.getUsername(), x : lat, y: lng}});
+        Socket.emit('location', {gameId: UserGameIds.getGameId(), location: {username : UserGameIds.getUsername(), x : lng, y: lat}});
     };
 
 

@@ -36,7 +36,7 @@ class PlayerAsset extends GameObject {
             &&  ((this.getY() - self.target.y)*(this.getY() - self.target.y) < 10 )){
             return true;
         }else {
-            console.log('-------------------- false ');
+            // console.log('-------------------- false ');
             return false;
         }
     }
@@ -46,7 +46,7 @@ class PlayerAsset extends GameObject {
             &&  ((self.getY() - self.owner.getY())*(self.getY() - self.owner.getY()) < 10 )){
             return true;
         }else {
-            console.log('-------------------- false ');
+            // console.log('-------------------- false ');
             return false;
         }
     }

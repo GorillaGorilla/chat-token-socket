@@ -59,6 +59,8 @@ class GameObject {
         for( var att in this){
             if(att !== 'physical' && att !== 'owner' && att !== 'game' && att !== 'routine'&& att !== 'AAbatterys' && att !== 'bombers'){
                 clone[att] = this[att];
+            }else if (att === 'owner'){
+                if (clone[att]){clone[att] = this[att].username;}
             }
         }
         clone.x = this.getX();

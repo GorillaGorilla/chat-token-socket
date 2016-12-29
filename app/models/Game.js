@@ -51,7 +51,7 @@ var controlPoints =  [];
 
 pointsOfInterest.forEach(function(poi){
     proj.mapsToMetres(poi);
-   controlPoints.push(new ControlPoint(poi.x, poi.y));
+   controlPoints.push(new ControlPoint(poi.x, poi.y, poi.name));
 });
 
 console.log('controlPoints', controlPoints);
@@ -501,7 +501,12 @@ exports.create = function(id, socketHandler, dbHandler){
                                 console.log('playEnt has battery_ready > 0', input.destination);
                                 proj.mapsToMetres(input.destination);
                                 console.log('target after conversion: ', input.destination);
-                                BatteryFactory.newBattery(playEnt, self).addDestination(input.destination.x, input.destination.y);
+                                if (input.destination.x && input.destination.y){
+                                    BatteryFactory.newBattery(playEnt, self).addDestination(input.destination.x, input.destination.y);
+                                }else {
+                                    console.log('send battery failed, inputs wrong format', input);
+                                }
+
                             }
                         }else if (input.action === 'BUY_BOMBER'){
                             console.log('BUY_BOMBER', playEnt.username, playEnt.money);
@@ -531,9 +536,11 @@ exports.create = function(id, socketHandler, dbHandler){
                     proj.mapsToMetres(self.new_locations[playEnt.username]);
                     // console.log('proj.x', self.new_locations[playEnt.userId].x);
                     playEnt.setPosition(self.new_locations[playEnt.username].x, self.new_locations[playEnt.username].y);
-                    self.controlPoints.forEach(function(cp){
-                        cp.capture(playEnt);
-                    });
+                    if (playEnt.state === 'living'){
+                        self.controlPoints.forEach(function(cp){
+                            cp.capture(playEnt);
+                        });
+                    }
                     self.new_locations[playEnt.username] = null;
                 }
             })
