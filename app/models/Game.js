@@ -54,8 +54,6 @@ pointsOfInterest.forEach(function(poi){
    controlPoints.push(new ControlPoint(poi.x, poi.y, poi.name));
 });
 
-console.log('controlPoints', controlPoints);
-
 hospitals.forEach(function(poi){
     proj.mapsToMetres(poi);
     poi.position = Vector.create(poi.x, poi.y);
