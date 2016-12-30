@@ -2,7 +2,7 @@
  * Created by frederickmacgregor on 28/12/2016.
  */
 "use strict";
-var GameObject  = require('./gameobject.class');
+var GameObject  = require('./gameobject.class.js');
 
 
 class ControlPoint extends GameObject {

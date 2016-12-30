@@ -13,10 +13,10 @@ debug = require('debug')('http'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    PlayerFactory = require('../models/PlayerEntity'),
-    BomberFactory = require('../models/Bomber'),
-    BatteryFactory = require('../models/AABattery'),
-        Attack = require('../models/Attack.model'),
+    PlayerFactory = require('../models/game_entities/PlayerEntity'),
+    BomberFactory = require('../models/game_entities/Bomber'),
+    BatteryFactory = require('../models/game_entities/AABattery'),
+        Attack = require('../models/db_models/Attack.model.js'),
     AttackCtrl = require('./attack.controller');
 
 

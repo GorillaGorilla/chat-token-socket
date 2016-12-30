@@ -3,7 +3,7 @@
  */
 
 'use strict';
-var GameObject = require('./gameobject.class'),
+var GameObject = require('./gameobject.class.js'),
     Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,

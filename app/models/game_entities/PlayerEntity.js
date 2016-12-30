@@ -8,7 +8,7 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body;
 
-var GameObject = require('./gameobject.class');
+var GameObject = require('./gameobject.class.js');
 
 class PlayerEntity extends GameObject {
     constructor(x, y, player, game){

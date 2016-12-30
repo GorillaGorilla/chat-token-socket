@@ -11,12 +11,12 @@ var proj = require('../controllers/convert_maps'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    PlayerFactory = require('./PlayerEntity'),
-    BomberFactory = require('./Bomber'),
-    BatteryFactory = require('./AABattery');
+    PlayerFactory = require('./game_entities/PlayerEntity'),
+    BomberFactory = require('./game_entities/Bomber'),
+    BatteryFactory = require('./game_entities/AABattery');
     // Attack = require('mongoose').model('Attack');
 
-var ControlPoint = require('./controlpoint.class');
+var ControlPoint = require('./game_entities/controlpoint.class.js');
 
 var requestUpdateFrame;
 var RENDER_TIME = 200,
@@ -134,46 +134,7 @@ exports.create = function(id, socketHandler, dbHandler){
         return true;
     };
 
-    var render = function(){
-        // console.log('render called');
-        var assets = [];
-        game.flaks.forEach(function(flak){
-            var flakState = flak.getState();
-            proj.metresToMaps(flakState);
-            assets.push(flakState);
-        });
-        game.AAbatterys.forEach(function(battery){
-            var batteryState = battery.getState();
-            proj.metresToMaps(batteryState);
-            assets.push(batteryState);
-        });
-        game.bombers.forEach(function(bomber){
-            var bomberState = bomber.createClone();
-            proj.metresToMaps(bomberState);
-            assets.push(bomberState);
-        });
-        var playerStates = [];
-        game.playerEntities.forEach(function(entity){
-            var entityState = entity.createClone();
-            entityState.money = Math.floor(entityState.money);
-            // console.log('entity clone', entityState);
-            proj.metresToMaps(entityState);
-            playerStates.push(entityState);
-
-        });
-        // game.controlPoints.forEach(function(entity){  //too many to update constantly...
-        //     var entityState = entity.createClone();
-        //     // console.log('controlPoint clone', entityState);
-        //     proj.metresToMaps(entityState);
-        //     assets.push(entityState);
-        // });
-        // console.log('assets created');
-        game.renderTime = 0;
-        nextState.players = playerStates;
-        nextState.assets = assets;
-        game.socketHandler.sendGameState(nextState);
-        nextState = {};
-    };
+    var render = require('../controllers/renderer');
     // if (process.env.NODE_ENV === 'test'){
     //     socketHandler.emit = function(id, event, msg){
     //         console.log(Date.now());
@@ -473,7 +434,7 @@ exports.create = function(id, socketHandler, dbHandler){
             // console.log('engine update over', this.renderTime);
 
             if (this.renderTime>RENDER_TIME){
-                render();
+                render(this, nextState);
             }
             if (this.running){
                 debug("running is true");

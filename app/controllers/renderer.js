@@ -1,0 +1,39 @@
+/**
+ * Created by frederickmacgregor on 30/12/2016.
+ */
+"use strict";
+var proj = require('../controllers/convert_maps');
+
+module.exports = function(game, nextState){
+    // console.log('render called');
+    var assets = [];
+    game.flaks.forEach(function(flak){
+        var flakState = flak.getState();
+        proj.metresToMaps(flakState);
+        assets.push(flakState);
+    });
+    game.AAbatterys.forEach(function(battery){
+        var batteryState = battery.getState();
+        proj.metresToMaps(batteryState);
+        assets.push(batteryState);
+    });
+    game.bombers.forEach(function(bomber){
+        var bomberState = bomber.createClone();
+        proj.metresToMaps(bomberState);
+        assets.push(bomberState);
+    });
+    var playerStates = [];
+    game.playerEntities.forEach(function(entity){
+        var entityState = entity.createClone();
+        entityState.money = Math.floor(entityState.money);
+        // console.log('entity clone', entityState);
+        proj.metresToMaps(entityState);
+        playerStates.push(entityState);
+
+    });
+    game.renderTime = 0;
+    nextState.players = playerStates;
+    nextState.assets = assets;
+    game.socketHandler.sendGameState(nextState);
+    nextState = {};
+};

@@ -10,8 +10,8 @@ var Matter = require('matter-js'),
     // Proj4js = require('proj4'),
     chai = require('chai'),
     expect = chai.should(),
-    Bomber = require('../models/bomber.class'),
-    GameObject = require('../models/gameobject.class'),
+    Bomber = require('../models/game_entities/bomber.class.js'),
+    GameObject = require('../models/game_entities/gameobject.class.js'),
     Routines = require('../models/routines'),
     Game = require('../models/Game'),
     game = Game.create(UUID(),require('../../mockSocketHandler'),require('../../mock.dbhandler'));
@@ -19,7 +19,7 @@ var Matter = require('matter-js'),
 
 
 var World = Matter.World,
-    PlayerFactory = require('../models/PlayerEntity');
+    PlayerFactory = require('../models/game_entities/PlayerEntity');
 
 var fakeOwner,
     bomber,

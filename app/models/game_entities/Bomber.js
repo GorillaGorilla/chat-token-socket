@@ -8,9 +8,9 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body,
     Bomb = require('./Bomb'),
-    proj = require('../controllers/convert_maps'),
+    proj = require('../../controllers/convert_maps'),
     UUID = require('node-uuid'),
-    Bomber = require('./bomber.class');
+    Bomber = require('./bomber.class.js');
 
 // exports.newBomber = function(playerEntity, game){
 //     // create a bomber at the same location as a player, with standard attributes and methods for dropping a bomb

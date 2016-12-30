@@ -8,7 +8,7 @@ var Matter = require('matter-js'),
     Vector = Matter.Vector,
     Body =  Matter.Body,
     Flak = require('./Flak'),
-    proj = require('../controllers/convert_maps'),
+    proj = require('../../controllers/convert_maps'),
     UUID = require('node-uuid');
 
 exports.newBattery = function(playerEntity, game){

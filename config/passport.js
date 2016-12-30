@@ -7,7 +7,7 @@ var JwtStrategy = require('passport-jwt').Strategy,
     socketio = require('socket.io');
 
 // load up the user model
-var Responder = require('../app/models/responder.server.model.js');
+var Responder = require('../app/models/db_models/responder.server.model.js');
 var config = require('./config'); // get db config file
 
 module.exports = function(passport) {

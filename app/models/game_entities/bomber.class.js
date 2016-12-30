@@ -2,8 +2,8 @@
  * Created by frederickmacgregor on 27/12/2016.
  */
 'use strict';
-var PlayerAsset = require('./playerasset.class'),
-    Routines = require('./routines'),
+var PlayerAsset = require('./playerasset.class.js'),
+    Routines = require('./../routines'),
     Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
