@@ -242,7 +242,7 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.controlPoints.forEach(function(cp){
                         if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
                             console.log('hit');
-                            cp.health -= bomb.damage;
+                            cp.hit(bomb.damage);
                             AttackCtrl.saveAttack({
                                 game: self.gameId,
                                 type: "BOMB HIT CONTROL POINT",

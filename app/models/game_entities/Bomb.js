@@ -16,7 +16,7 @@ exports.newBomb = function(x, y, parentAsset){
     bomb.owner = parentAsset.owner;
     bomb.droppedBy = parentAsset.id;
     bomb.damage = 34;
-    bomb.blast_radius = 150;
+    bomb.blast_radius = 50;
     bomb.update = function(dt){
         console.log('bomb update', bomb.fuse, dt, bomb.getX(), bomb.getY());
         bomb.fuse -= dt*10;

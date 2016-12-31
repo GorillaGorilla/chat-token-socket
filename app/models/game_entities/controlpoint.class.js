@@ -17,6 +17,7 @@ class ControlPoint extends GameObject {
         this.maxHealth = 50;
         this.owner = null;
         this.temp = 0;
+        this.points = 0.005;
     }
 
     capture(playerEntity){
@@ -48,16 +49,29 @@ class ControlPoint extends GameObject {
         return (this.lastVisitedTime) ? ((this.temp - this.lastVisitedTime) >= this.frequencyOfVisits) : true;
     }
 
+    hit(damage){
+        this.health -= damage;
+        if(this.health <0){
+            this.health = 0;
+            this.owner = null;
+        }
+    }
+
+
     update(dt){
         // regenerates health
         if(this.health === this.maxHealth){
-            return;
-        }
 
-        if (this.health < this.maxHealth){
+        }else if (this.health < this.maxHealth){
             this.health += dt*this.naturalRegeneration;
         }else{
             this.health = Number(String(this.maxHealth));
+        }
+
+        if (this.owner){
+            if (this.owner.state === 'living'){
+                this.owner.points += dt*this.points;
+            }
         }
     }
 

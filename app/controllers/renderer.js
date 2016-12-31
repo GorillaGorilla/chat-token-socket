@@ -27,6 +27,7 @@ module.exports = function(game, nextState){
     game.playerEntities.forEach(function(entity){
         var entityState = entity.createClone();
         entityState.money = Math.floor(entityState.money);
+        entityState.score = Math.floor(entityState.score);
         // console.log('entity clone', entityState);
         proj.metresToMaps(entityState);
         playerStates.push(entityState);
