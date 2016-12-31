@@ -19,6 +19,7 @@ class PlayerEntity extends GameObject {
         this.money=50;
         this.moneyRate= 0.005;
         this.points= 0;
+        this.health = 150;
         this.state= 'living';
         this.lat= x;
         this.lng= y;
