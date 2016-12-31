@@ -198,6 +198,7 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.playerEntities.forEach(function(playEnt){
                         if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
                             console.log('hit');
+                            bomb.owner.points += 5;
                             playEnt.health -= bomb.damage;
                             AttackCtrl.saveAttack({
                                 game: self.gameId,
@@ -213,6 +214,7 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.AAbatterys.forEach(function(aaBattery){
                         if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
                             console.log('hit');
+                            bomb.owner.points += 1;
                             aaBattery.health -= bomb.damage;
                             AttackCtrl.saveAttack({
                                 game: self.gameId,
@@ -242,6 +244,7 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.controlPoints.forEach(function(cp){
                         if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
                             console.log('hit');
+                            bomb.owner.points += 1;
                             cp.hit(bomb.damage);
                             AttackCtrl.saveAttack({
                                 game: self.gameId,
@@ -294,6 +297,7 @@ exports.create = function(id, socketHandler, dbHandler){
                             });
 
                             if (bomber.health <= 0){
+                                flak.owner.score += 1;
                                 AttackCtrl.saveAttack({
                                     game: self.gameId,
                                     type: "BOMBER DESTROYED",
