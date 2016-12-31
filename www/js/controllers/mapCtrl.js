@@ -19,7 +19,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
         player: "img/player_icon.png",
         enemy: "img/colonel2.png",
         BOMBER: "img/plane.png",
-        AA_TANK: "img/AA_TANK.png",
+        "MOBILE_AA": "img/AA_TANK.png",
         FLAK: "img/FLAK.png"
     };
 

@@ -281,7 +281,7 @@ exports.create = function(id, socketHandler, dbHandler){
                 if (flak.state === 'live'){
                     flak.update(dt);
                     self.bombers.forEach(function(bomber){
-                        if (checkCollisions(flak.getPosition(), bomber.physical.position, 10)){
+                        if (checkCollisions(flak.getPosition(), bomber.getPosition(), 10)){
                             console.log('hit');
                             bomber.health -= flak.damage;
                             AttackCtrl.saveAttack({
@@ -289,8 +289,8 @@ exports.create = function(id, socketHandler, dbHandler){
                                 type: "FLAK HIT",
                                 owner: flak.owner.username,
                                 target: bomber.owner.username,
-                                x: flak.getX().toFixed(3),
-                                y: flak.getY().toFixed(3)
+                                x: flak.getX().toFixed(5),
+                                y: flak.getY().toFixed(5)
                             });
 
                             if (bomber.health <= 0){
@@ -300,8 +300,8 @@ exports.create = function(id, socketHandler, dbHandler){
                                     owner: flak.owner.username,
                                     target: bomber.owner.username,
                                     asset: flak.firedBy.id,
-                                    x: bomber.getX().toFixed(3),
-                                    y: bomber.getY().toFixed(3)
+                                    x: bomber.getX().toFixed(5),
+                                    y: bomber.getY().toFixed(5)
                                 });
                             }
                             // remove flak from here, but also from Engine!

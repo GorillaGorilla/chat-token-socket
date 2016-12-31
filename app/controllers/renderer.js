@@ -9,11 +9,12 @@ module.exports = function(game, nextState){
     var assets = [];
     game.flaks.forEach(function(flak){
         var flakState = flak.getState();
+        // console.log('flakState in renderer', flakState);
         proj.metresToMaps(flakState);
         assets.push(flakState);
     });
     game.AAbatterys.forEach(function(battery){
-        var batteryState = battery.getState();
+        var batteryState = battery.createClone();
         proj.metresToMaps(batteryState);
         assets.push(batteryState);
     });
@@ -34,6 +35,7 @@ module.exports = function(game, nextState){
     game.renderTime = 0;
     nextState.players = playerStates;
     nextState.assets = assets;
+    // console.log("next state",nextState);
     game.socketHandler.sendGameState(nextState);
     nextState = {};
 };

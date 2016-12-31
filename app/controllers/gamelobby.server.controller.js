@@ -63,23 +63,33 @@ module.exports = function(io, client) {
             username: client.username
         },function(err, result){
             if(err){return console.log(err);}
-
             AttackCtrl.formatAsMessages(result);
-
-        } )
+        })
     });
 
-    client.on('control point state', function(){
+    client.on('control point state', function(listOfRelevantPoints){
         console.log('control point state');
-
         var points = [];
-        // console.log('cp1',GameServer.getPlayerGame(client.username).controlPoints[0]);
+        if (listOfRelevantPoints){
+        //    grab only those points
+
+        }
+        // testing performance... lol
+        console.log('cp1', Date.now());
             GameServer.getPlayerGame(client.username).controlPoints.forEach(function(cp){
-                var clone = cp.createClone()
+                if(cp.owner){
+                    console.log('gamelobby cp.owner.username', cp.owner.username);
+                }
+                var clone = cp.createClone();
                 proj.metresToMaps(clone);
+                if(clone.owner){
+                    console.log('gamelobby cp.owner.username', clone.owner.username);
+                }
+
+                if (clone)
                 points.push(clone);
             });
-            // console.log('cp2',GameServer.getPlayerGame(client.username).controlPoints[0]);
+        console.log('cp2', Date.now());
 
 
         client.emit('control points', {points: points});
@@ -109,7 +119,6 @@ module.exports = function(io, client) {
         }
         if (addedUser) {
             --numUsers;
-
             // echo globally that this client has left
             client.broadcast.emit('user left', {
                 username: client.username,

@@ -1,7 +1,8 @@
 /**
- * Created by frederickmacgregor on 27/12/2016.
+ * Created by frederickmacgregor on 31/12/2016.
  */
-'use strict';
+"use strict";
+
 var PlayerAsset = require('./playerasset.class.js'),
     Routines = require('./../routines'),
     Matter = require('matter-js'),
@@ -9,12 +10,12 @@ var PlayerAsset = require('./playerasset.class.js'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    Bomb = require('./Bomb');
+    Flak = require('./Flak');
 
-class Bomber extends PlayerAsset {
+class MobileAA extends PlayerAsset {
     constructor(owner, game){
         super(owner, game);
-        game.bombers.push(this);
+        game.AAbatterys.push(this);
         this.setRoutine(Routines.idle);
         this.type = 'BOMBER';
         //update accounting for where the bomber is etc for easy access
@@ -40,7 +41,6 @@ class Bomber extends PlayerAsset {
 
     update(dt){
         var self = this;
-        // console.log('update bomber');
         if (self.health <= 0){
             self.owner.bomber_in_action --;
             return self.running = false;
@@ -69,11 +69,6 @@ class Bomber extends PlayerAsset {
     }
 
 
-
-    dropBomb (){
-        this.game.addBomb(Bomb.newBomb(this.getX(), this.getY(), this));
-        console.log("bomb dropped");
-    }
 
 }
 

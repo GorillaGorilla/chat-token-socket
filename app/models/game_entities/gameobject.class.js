@@ -57,10 +57,15 @@ class GameObject {
     createClone(){
         var clone = {};
         for( var att in this){
-            if(att !== 'physical' && att !== 'owner' && att !== 'game' && att !== 'routine'&& att !== 'AAbatterys' && att !== 'bombers'){
+            if(att !== 'physical' && att !== 'owner' && att !== 'game' && att !== 'routine'&& att !== 'AAbatterys' && att !== 'bombers' && att !== 'target'){
                 clone[att] = this[att];
             }else if (att === 'owner'){
-                if (clone[att]){clone[att] = this[att].username;}
+                if(this[att]){
+                //    owner attribute is initialised as null, so only try to copy across the username if its been set
+                    clone[att] = this[att].username;
+
+                }
+
             }
         }
         clone.x = this.getX();

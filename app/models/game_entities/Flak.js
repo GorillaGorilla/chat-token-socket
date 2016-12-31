@@ -7,7 +7,8 @@ var Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
-    Body =  Matter.Body;
+    Body =  Matter.Body,
+    UUID = require('node-uuid');
 
 exports.newFlak = function(x, y, velocity, game, parentBattery){
     var bomb = {
@@ -16,11 +17,12 @@ exports.newFlak = function(x, y, velocity, game, parentBattery){
         bomb.state = 'live';
     bomb.fuse = 3000;  //seconds
     bomb.damage = 2;
+    bomb.id = UUID();
     bomb.type = "FLAK";
     bomb.owner = parentBattery.owner;
     bomb.firedBy = parentBattery;
     bomb.update = function(dt){
-        console.log('flak update', bomb.fuse, dt, bomb.getX(), bomb.getY());
+        // console.log('flak update', bomb.fuse, dt, bomb.getX(), bomb.getY());
         bomb.fuse -= dt;
         //check collisions
         if (bomb.fuse < 0){
@@ -36,8 +38,9 @@ exports.newFlak = function(x, y, velocity, game, parentBattery){
     bomb.setVelocity(velocity);
 
     var clone = function(){
-        console.log('clone called');
+        // console.log('clone called');
         var clone = {};
+        clone.id = this.id;
         clone.state = this.state;
         clone.type = "FLAK";
         clone.damage = this.damage;
