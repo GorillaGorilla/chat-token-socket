@@ -17,7 +17,8 @@ var express     = require('express'),
     server = require('http').createServer(app),
     io = require('socket.io')(server),
     transport = require('./config/transportsecurity'),
-    Attack = require('./app/controllers/survey.server.controller');
+    Attack = require('./app/controllers/survey.server.controller'),
+    LocationUpdater = require('./app/controllers/locationUpdates');
 
 
 var allowCrossDomain = function(req, res, next) {
@@ -66,6 +67,8 @@ apiRoutes.get('/users', passport.authenticate('jwt', { session: false}), functio
     console.log('protected route');
     res.send('protected route');
 });
+
+apiRoutes.post('/locationupdate', LocationUpdater.updatePlayerLocation);
 
 apiRoutes.get('/progress', Attack.list, Attack.returnList);
 

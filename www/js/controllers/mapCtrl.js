@@ -51,10 +51,16 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
   $scope.sendBomber = function(){
     console.log("send Bomber");
     var targetLatLng = $scope.map.getCenter();
-    var obj = { gameId: UserGameIds.getGameId(),
-      input:{username: UserGameIds.getUsername(),
-        action: 'SEND_BOMBER',
-        target: {x: targetLatLng.lng(), y: targetLatLng.lat()}}};
+    var obj = {
+        gameId: UserGameIds.getGameId(),
+      input:
+          {
+              username: UserGameIds.getUsername(),
+              action: 'SEND_BOMBER',
+              target: {x: targetLatLng.lng(), y: targetLatLng.lat()}
+          }
+    };
+
     Socket.emit('gameInputMessage',obj);
   };
 

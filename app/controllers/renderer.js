@@ -33,9 +33,18 @@ module.exports = function(game, nextState){
         playerStates.push(entityState);
 
     });
+    var explosions = [];
+    game.explosions.forEach(function(explo){
+        var exploState = explo.createClone();
+        proj.metresToMaps(exploState);
+        explosions.push(exploState);
+    });
+
+
     game.renderTime = 0;
     nextState.players = playerStates;
     nextState.assets = assets;
+    nextState.explosions = explosions;
     // console.log("next state",nextState);
     game.socketHandler.sendGameState(nextState);
     nextState = {};

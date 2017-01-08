@@ -8,7 +8,7 @@ exports.getRecentAttacks = function(input, callback){
 
     // param not used because cant be bothered to look at mongoose docs filter instead.
     var params = input.username ? {occurred : { $gte : input.dateFrom}, username: input.username } : {occurred : { $gte : input.dateFrom}};
-    Attack.find({occurred : { $gte : input.dateFrom}}, function(err, docs){
+    Attack.find({occurred : { $gte : input.dateFrom}, game: input.gameId}, function(err, docs){
         if(err){console.log('err', err);
         return callback(err);
 
@@ -35,6 +35,8 @@ exports.formatAsMessages = function (attackArray,username){
                 messages.push(writeMessageFlakHitString(att, username));
             }else if (att.type === "BOMBER DESTROYED"){
                 messages.push(writeMessageBomberDestroyedString(att, username));
+            }else if (att.type ==="BOMB HIT MOBILE AA"){
+                messages.push(writeMessageBombHitAA(att, username));
             }
 
     });
@@ -52,6 +54,18 @@ function writeMessageFlakHitString(att, username){
         }
         result = {username: 'Game', message: result};
         return result;
+};
+
+
+function writeMessageBombHitAA(att, username){
+    var result = "";
+    if (username === att.owner){
+        result += "Your bomb hit " + att.target + "'s mobile AA gun at x: " + att.x + " y: " + att.y + ".";
+    }else if (username === att.target){
+        result += "Your mobile AA was was bombed at position x: " + att.x + " y: " + att.y + " dropped by " + att.owner +"'s bomber.";
+    }
+    result = {username: 'Game', message: result};
+    return result;
 };
 
 

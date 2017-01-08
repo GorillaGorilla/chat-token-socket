@@ -17,8 +17,7 @@ var points = [
     {x: 13.735268, y: -85, name: "Test2"},
     {x: -15.664559, y: 29.491951, name: "Zambia"},
     {x: 51.52719174, y: -0.05539211162, name: "Bethnal Green"}
-
-]
+];
 
 var pointsConverted = [];
 console.log('points', points);

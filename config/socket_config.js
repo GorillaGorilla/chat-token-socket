@@ -136,10 +136,10 @@ module.exports = function(io){
                         dateFrom.setTime(dateFrom.getTime() - 3600000*4);
                         Attack.getRecentAttacks({
                             dateFrom : dateFrom,
-                            username: socket.username
+                            username: socket.username,
+                            gameId : data.gameId
                         },function(err, result){
                             if(err){return console.log(err);}
-
 
                             msgs = Attack.formatAsMessages(result, socket.username);
                             console.log('emitting messages all messages', msgs);

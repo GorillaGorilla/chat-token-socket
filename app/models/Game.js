@@ -13,7 +13,8 @@ var proj = require('../controllers/convert_maps'),
     Body =  Matter.Body,
     PlayerFactory = require('./game_entities/PlayerEntity'),
     BomberFactory = require('./game_entities/Bomber'),
-    BatteryFactory = require('./game_entities/AABattery');
+    BatteryFactory = require('./game_entities/AABattery'),
+    ObjectFactory = require('./game_entities/ObjectFactory');
     // Attack = require('mongoose').model('Attack');
 
 var ControlPoint = require('./game_entities/controlpoint.class.js');
@@ -176,6 +177,7 @@ exports.create = function(id, socketHandler, dbHandler){
         controlPoints: controlPoints,
         bombs : [],
         flaks : [],
+        explosions : [],
         getPlayerEntity: function(username){
             var playerEntity = null;
             this.playerEntities.forEach(function(ent){
@@ -195,6 +197,8 @@ exports.create = function(id, socketHandler, dbHandler){
                     console.log('fire in the hole!');
                     console.log('x', bomb.getX());
                     console.log('y', bomb.getY());
+                    self.explosions.push(ObjectFactory.createExplosion(bomb.getX(),bomb.getY(), bomb.blast_radius));
+                    console.log('explosions:', self.explosions);
                     self.playerEntities.forEach(function(playEnt){
                         if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
                             console.log('hit');
@@ -244,7 +248,9 @@ exports.create = function(id, socketHandler, dbHandler){
                     self.controlPoints.forEach(function(cp){
                         if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
                             console.log('hit');
-                            bomb.owner.points += 1;
+                            if (cp.owner){
+                                bomb.owner.points += 1;
+                            }
                             cp.hit(bomb.damage);
                             AttackCtrl.saveAttack({
                                 game: self.gameId,
@@ -274,6 +280,16 @@ exports.create = function(id, socketHandler, dbHandler){
 
                     self.bombs.splice(i, 1);
 
+                }
+            });
+        },
+        updateExplosions : function(dt){
+            var self = this;
+            self.explosions.forEach((expl, i)=>{
+                if(expl.running){
+                    expl.update(dt);
+                }else{
+                    self.explosions.splice(i, 1);
                 }
             });
         },
@@ -397,6 +413,7 @@ exports.create = function(id, socketHandler, dbHandler){
             self.handleLocations();
             self.updateBombs(dt);
             self.updateFlaks(dt);
+            self.updateExplosions(dt);
             self.playerEntities.forEach(function(ent){
                 ent.update(dt);
                 if(moneyUpdate<0 && ent.state !== 'wounded'){

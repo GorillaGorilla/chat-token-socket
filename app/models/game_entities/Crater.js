@@ -1,6 +1,11 @@
 /**
  * Created by frederickmacgregor on 05/12/2016.
+ *
+ *
+ *
  */
+
+
 exports.newCrater = function(x, y, r, life_time){
     var crater = {
     };
