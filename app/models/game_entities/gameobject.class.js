@@ -15,6 +15,8 @@ class GameObject {
     constructor(x, y) {
         this.physical = Bodies.circle(x, y, 5);
         this.id = UUID();
+        this.radius = 5;
+
         this.running = true;
         this.speed= 0.3;
         this.damage = 40;
@@ -68,6 +70,7 @@ class GameObject {
 
             }
         }
+        clone.radius = this.radius*6.06;
         clone.x = this.getX();
         clone.y = this.getY();
 
