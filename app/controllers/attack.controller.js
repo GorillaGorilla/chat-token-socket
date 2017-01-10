@@ -16,10 +16,10 @@ exports.getRecentAttacks = function(input, callback){
 
         docs.filter(function(doc){
             return (doc.owner === input.username || doc.target === input.username)
-        });
-
+        })
+        console.log('attacks since time given',docs); //prints empty arry [];
         callback(null, docs);
-        console.log('attacks since time given',docs); //prints empty arry []
+
     });
 
 

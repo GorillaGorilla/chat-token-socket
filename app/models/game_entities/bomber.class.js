@@ -71,7 +71,8 @@ class Bomber extends PlayerAsset {
 
 
     dropBomb (){
-        this.game.addBomb(Bomb.newBomb(this.getX()+Math.random()*5, this.getY()+Math.random()*5, this));
+        this.game.addBomb(Bomb.newBomb((this.getX()+Math.random()*5)-2.5,
+            (this.getY()+Math.random()*5)-2.5, this));
         console.log("bomb dropped");
     }
 

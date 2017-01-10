@@ -25,7 +25,6 @@ class Explosion extends GameObject{
 
     createClone(){
         var clone = super.createClone();
-        clone.radius = clone.radius*6.06;
         return clone;
     }
 }

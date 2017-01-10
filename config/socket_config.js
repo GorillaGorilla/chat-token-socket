@@ -139,8 +139,10 @@ module.exports = function(io){
                             username: socket.username,
                             gameId : data.gameId
                         },function(err, result){
-                            if(err){return console.log(err);}
-
+                            if(err){
+                                return console.log(err);
+                            }
+                            console.log('result: ', result);
                             msgs = Attack.formatAsMessages(result, socket.username);
                             console.log('emitting messages all messages', msgs);
                             socket.emit('all messages', {messages:msgs});

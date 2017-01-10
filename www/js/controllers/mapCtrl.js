@@ -126,7 +126,7 @@ angular.module('map').controller('MapCtrl', function($scope, $state, $cordovaGeo
     // console.log('game state', state);
     $scope.score = state;
     render(state);
-    if(!locationOveride){delayPositionCall();}
+    // if(!locationOveride){delayPositionCall();}
 
   });
 
