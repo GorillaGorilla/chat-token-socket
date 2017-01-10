@@ -129,7 +129,7 @@ module.exports = function(io, client) {
 
     client.on('disconnect', function() {
         var play = GameServer.setDisconnectTime(client.username);
-        console.log('discon time',play.disconnectedAt);
+        // console.log('discon time',play.disconnectedAt);
         console.log('disconnect username', client.username);
 
     });

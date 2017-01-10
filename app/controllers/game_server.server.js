@@ -29,12 +29,12 @@ game_server.findGame = function(player){
         if (ent){
         //    player is already in a game, therefore replace the old socket connection with the new one.
             var dateFrom = ent.disconnectedAt;
-            console.log('dateFrom',dateFrom);
-            console.log('now', new Date());
+            // console.log('dateFrom',dateFrom);
+            // console.log('now', new Date());
 
             Attack.find({occurred : { $gte : dateFrom} }, function(err, docs){
                 if(err){console.log('err', err)}
-                console.log('attacks since disconnecting',docs); //prints empty arry []
+                // console.log('attacks since disconnecting',docs); //prints empty arry []
             });
 
             self.games[ent.gameId].socketHandler.addPlayer(player);

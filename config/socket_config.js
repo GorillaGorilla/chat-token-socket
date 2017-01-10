@@ -83,7 +83,7 @@ module.exports = function(io){
                             return socket.emit('unauthorized', err);
                         }
 
-                        console.log('user retreived?', user);
+                        // console.log('user retreived?', user);
                         if (!user) {
                             console.log("no user");
                             return socket.emit('unauthorized', "no user");
@@ -97,7 +97,7 @@ module.exports = function(io){
                                 var namespace = (server.nsps && socket.nsp &&
                                     server.nsps[socket.nsp.name]) ||
                                     server.sockets;
-                                console.log(namespace);
+                                // console.log(namespace);
                                 // explicit namespace
                                 namespace.server.emit('authenticated', socket);
                             }
