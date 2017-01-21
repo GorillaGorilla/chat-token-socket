@@ -6,7 +6,8 @@ var Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
-    Body =  Matter.Body;
+    Body =  Matter.Body,
+    Map = require('./category_filter_masks');
 
 var GameObject = require('./gameobject.class.js');
 
@@ -33,7 +34,12 @@ class PlayerEntity extends GameObject {
         this.bombers_lost = 0;
 
         game.World.add(game.engine.world, this.physical);
-        this.physical.collisionFilter.group = -1;
+        this.physical.collisionFilter.group = 0;
+        this.physical.collisionFilter.category = Map.PLAYER;
+        console.log('Player collisionFilter.category: ', this.physical.collisionFilter.category);
+        // single pipe is bitwise ADD
+        this.physical.collisionFilter.mask = Map.EXPLOSION ;
+        console.log('Player collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     get gameId(){

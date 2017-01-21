@@ -36,6 +36,10 @@ class GameObject {
         return this.physical.position;
     }
 
+    setVelocity(vector) {
+        Body.setVelocity(this.physical, vector);
+    };
+
     checkCollisionObj (gameObj, distance){
         //    return true or false
         var distanceVector = Vector.sub(this.getPosition(), gameObj.getPosition());

@@ -11,6 +11,7 @@ var proj = require('../controllers/convert_maps'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
+    Events = Matter.Events,
     PlayerFactory = require('./game_entities/PlayerEntity'),
     BomberFactory = require('./game_entities/Bomber'),
     BatteryFactory = require('./game_entities/AABattery'),
@@ -155,6 +156,12 @@ exports.create = function(id, socketHandler, dbHandler){
     var moneyUpdate = 100000;
     var moneyUpdateTime = 100000;
 
+
+    Events.on(engine, "collisionActive", function(events){
+        console.log('collisionActive event fired', events);
+
+    });
+
     game =  {
         gameId: id,
         socketHandler: socketHandler,
@@ -296,11 +303,11 @@ exports.create = function(id, socketHandler, dbHandler){
         updateFlaks: function(dt){
             var self = this;
             self.flaks.forEach(function(flak, i){
-                console.log('updating a flak');
+                // console.log('updating a flak');
                 if (flak.state === 'live'){
                     flak.update(dt);
                     self.bombers.forEach(function(bomber){
-                        if (checkCollisions(flak.getPosition(), bomber.getPosition(), 10)){
+                        if (checkCollisions(flak.getPosition(), bomber.getPosition(), 0.1)){
                             console.log('hit');
                             bomber.health -= flak.damage;
                             AttackCtrl.saveAttack({
@@ -319,7 +326,7 @@ exports.create = function(id, socketHandler, dbHandler){
                                     type: "BOMBER DESTROYED",
                                     owner: flak.owner.username,
                                     target: bomber.owner.username,
-                                    asset: flak.firedBy.id,
+                                    asset: flak.playerId,
                                     x: bomber.getX().toFixed(5),
                                     y: bomber.getY().toFixed(5)
                                 });

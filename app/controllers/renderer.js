@@ -8,7 +8,7 @@ module.exports = function(game, nextState){
     // console.log('render called');
     var assets = [];
     game.flaks.forEach(function(flak){
-        var flakState = flak.getState();
+        var flakState = flak.createClone();
         // console.log('flakState in renderer', flakState);
         proj.metresToMaps(flakState);
         assets.push(flakState);

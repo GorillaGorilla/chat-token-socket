@@ -8,6 +8,6 @@ angular.module('starter')
   })
 
   .constant('API_ENDPOINT', {
-    url: 'https://socket-token.mybluemix.net'
-      // url: 'http://localhost:6017'
+    // url: 'https://socket-token.mybluemix.net'
+      url: 'http://localhost:6017'
   });

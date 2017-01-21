@@ -10,7 +10,8 @@ var PlayerAsset = require('./playerasset.class.js'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    Flak = require('./Flak');
+    Flak = require('./Flak'),
+    Map = require('./category_filter_masks');
 
 class MobileAA extends PlayerAsset {
     constructor(owner, game){
@@ -33,6 +34,12 @@ class MobileAA extends PlayerAsset {
         //update accounting for where the bomber is etc for easy access
         // console.log('this.owner', this.owner);
         this.owner.sendAAAcounting(this);
+        this.physical.collisionFilter.group = 0;
+        this.physical.collisionFilter.category = Map.MOBILE_AA;
+        // single & is bitwise ADD
+        this.physical.collisionFilter.mask = Map.MOBILE_AA & Map.EXPLOSION ;
+        console.log('AA collisionFilter.category: ', this.physical.collisionFilter.category);
+        console.log('AA collisionFilter.mask: ', this.physical.collisionFilter.mask);
 
     }
 

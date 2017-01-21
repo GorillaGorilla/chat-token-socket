@@ -9,7 +9,8 @@ var PlayerAsset = require('./playerasset.class.js'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    Bomb = require('./Bomb');
+    Bomb = require('./Bomb'),
+    Map = require('./category_filter_masks');
 
 class Bomber extends PlayerAsset {
     constructor(owner, game){
@@ -19,7 +20,12 @@ class Bomber extends PlayerAsset {
         this.type = 'BOMBER';
         //update accounting for where the bomber is etc for easy access
         owner.sendBomberAccounting(this);
-
+        this.physical.collisionFilter.group = 0;
+        this.physical.collisionFilter.category = Map.BOMBER;
+        // single pipe is bitwise ADD
+        this.physical.collisionFilter.mask = Map.FLAK;
+        console.log('BOMBER collisionFilter.category: ', this.physical.collisionFilter.category);
+        console.log('BOMBER collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     setTarget(x, y){
