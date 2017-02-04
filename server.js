@@ -112,7 +112,7 @@ try {
     //     }
     // });
 
-    var mailerTransport = mailer.createTransport('smtps://palanalst@gmail.com:89Palbert@smtp.gmail.com');
+    var mailTransport = mailer.createTransport('smtps://palanalst@gmail.com:89Palbert@smtp.gmail.com');
 
     var mailOptions = {
         from: 'Server <server@gameapp.com>', // sender address
