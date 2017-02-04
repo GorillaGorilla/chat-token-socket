@@ -18,7 +18,7 @@
     "mongoose": "~4.2.4",
     "morgan": "~1.5.0",
     "node-uuid": "^1.4.7",
-    "nodemailer": "^3.0.2",
+    "nodemailer": "2.7.0",
     "passport": "^0.3.0",
     "passport-jwt": "^2.1.0",
     "proj4": "^2.3.15",
