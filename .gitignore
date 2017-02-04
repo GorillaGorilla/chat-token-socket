@@ -1,3 +1,2 @@
-node_modules/*
-!node_modules/nodemailer
+node_modules
 .idea/

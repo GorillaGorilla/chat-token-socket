@@ -5,7 +5,7 @@
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 try {
-    throw new Error("Some error..."); // remove this once you're happy with it..
+    // throw new Error("Some error..."); // remove this once you're happy with it..
     var express     = require('express'),
         app         = express(),
         bodyParser  = require('body-parser'),
