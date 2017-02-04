@@ -104,17 +104,19 @@ try {
     });
 
     var mailer = require('nodemailer');
-    var mailTransport = mailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: 'youremail@gmail.com',
-            pass: '' //you need to create an app password in gmail for this => https://myaccount.google.com/apppasswords
-        }
-    });
+    // var mailTransport = mailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //         user: 'youremail@gmail.com',
+    //         pass: '' //you need to create an app password in gmail for this => https://myaccount.google.com/apppasswords
+    //     }
+    // });
+
+    var mailerTransport = mailer.createTransport('smtps://palanalst@gmail.com:89Palbert@smtp.gmail.com');
 
     var mailOptions = {
         from: 'Server <server@gameapp.com>', // sender address
-        to: 'briankane1@gmail.com', // list of receivers
+        to: 'fm8pref9@gmail.com', // list of receivers
         subject: 'Crash Report', // Subject line
         text: error_report
     };
