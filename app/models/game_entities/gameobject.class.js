@@ -13,15 +13,16 @@ var Matter = require('matter-js'),
 
 class GameObject {
     constructor(x, y) {
-        this.physical = Bodies.circle(x, y, 5);
+        this.physical = Bodies.circle(x, y, 10);
         this.id = UUID();
         this.radius = 5;
-
+        this.type = 'GAME_OBJECT';
         this.running = true;
         this.speed= 0.3;
         this.damage = 40;
         this.health= 50;
         this.line_of_sight = 50;
+        this.physical.goRef = this;
     }
     getX(){
         return this.physical.position.x;
@@ -35,6 +36,10 @@ class GameObject {
     getPosition() {
         return this.physical.position;
     }
+
+    setVelocity(vector) {
+        Body.setVelocity(this.physical, vector);
+    };
 
     checkCollisionObj (gameObj, distance){
         //    return true or false

@@ -76,6 +76,7 @@ module.exports = function(io, client) {
         }
         // testing performance... lol
         console.log('cp1', Date.now());
+            // crashed once at char54...why??
             GameServer.getPlayerGame(client.username).controlPoints.forEach(function(cp){
                 if(cp.owner){
                     console.log('gamelobby cp.owner.username', cp.owner.username);

@@ -5,12 +5,13 @@ var Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
-    Body =  Matter.Body;
+    Body =  Matter.Body,
+    Map = require('./category_filter_masks');
 
 exports.newBomb = function(x, y, parentAsset){
     var bomb = {
     };
-    bomb.physical = Bodies.rectangle(x, y, 1, 1),
+    bomb.physical = Bodies.circle(x, y, 1,{mass: 0});
     bomb.state = 'live';
     bomb.fuse = 0.001;
     bomb.owner = parentAsset.owner;
@@ -28,6 +29,11 @@ exports.newBomb = function(x, y, parentAsset){
     bomb.getX = function(){return this.physical.position.x};
     bomb.getY = function(){return this.physical.position.y};
     bomb.getPosition = function(){return this.physical.position};
+    parentAsset.game.World.add(game.engine.world, this.physical);
+    bomb.physical.collisionFilter.group = 0;
+    bomb.physical.collisionFilter.category = Map.BOMB;
+    // single pipe is bitwise ADD
+    bomb.physical.collisionFilter.mask = Map.MOBILE_AA &  Map.PLAYER ;
 
     return bomb;
 

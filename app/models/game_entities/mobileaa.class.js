@@ -10,7 +10,8 @@ var PlayerAsset = require('./playerasset.class.js'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
-    Flak = require('./Flak');
+    Flak = require('./Flak'),
+    Map = require('./category_filter_masks');
 
 class MobileAA extends PlayerAsset {
     constructor(owner, game){
@@ -33,6 +34,12 @@ class MobileAA extends PlayerAsset {
         //update accounting for where the bomber is etc for easy access
         // console.log('this.owner', this.owner);
         this.owner.sendAAAcounting(this);
+        this.physical.collisionFilter.group = 0;
+        this.physical.collisionFilter.category = Map.MOBILE_AA;
+        // single & is bitwise ADD
+        this.physical.collisionFilter.mask = Map.MOBILE_AA & Map.EXPLOSION ;
+        console.log('AA collisionFilter.category: ', this.physical.collisionFilter.category);
+        console.log('AA collisionFilter.mask: ', this.physical.collisionFilter.mask);
 
     }
 
@@ -150,7 +157,7 @@ class MobileAA extends PlayerAsset {
         var normal = Vector.normalise(posToDestination);
         // console.log('normal', normal);
         var velocity = Vector.mult(normal, 10);
-        var newVel = Vector.add(velocity, Vector.create((Math.random()*3)-1.5, (Math.random()*3)-1.5));
+        var newVel = Vector.add(velocity, Vector.create((Math.random())-0.5, (Math.random())-0.5));
         var flak = Flak.newFlak(this.getX(), this.getY(), newVel, this.game, self);
         this.game.addFlak(flak);
         console.log("flak added");

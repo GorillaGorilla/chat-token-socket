@@ -3,15 +3,25 @@
  */
 "use strict";
 
-var GameObject = require('./gameobject.class');
+var GameObject = require('./gameobject.class'),
+    Map = require('./category_filter_masks');
 
 
 class Explosion extends GameObject{
-    constructor(x, y, radius){
+    constructor(x, y, radius, game){
         super(x, y);
         this.fuse = 2000;
         this.initialFuse = 2000;
+
+        this.physical.goRef = this;
         this.radius = radius;
+        this.type = 'EXPLOSION';
+        this.physical.collisionFilter.group = 0;
+        this.physical.collisionFilter.category = Map.EXPLOSION;
+        // single pipe is bitwise ADD
+        this.physical.collisionFilter.mask = Map.MOBILE_AA & Map.PLAYER;
+        console.log('EXPLOSION collisionFilter.category: ', this.physical.collisionFilter.category);
+        console.log('EXPLOSION collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     update(dt){
@@ -25,6 +35,7 @@ class Explosion extends GameObject{
 
     createClone(){
         var clone = super.createClone();
+        console.log('clone', clone);
         return clone;
     }
 }

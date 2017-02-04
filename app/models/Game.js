@@ -11,6 +11,7 @@ var proj = require('../controllers/convert_maps'),
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
     Body =  Matter.Body,
+    Events = Matter.Events,
     PlayerFactory = require('./game_entities/PlayerEntity'),
     BomberFactory = require('./game_entities/Bomber'),
     BatteryFactory = require('./game_entities/AABattery'),
@@ -155,6 +156,74 @@ exports.create = function(id, socketHandler, dbHandler){
     var moneyUpdate = 100000;
     var moneyUpdateTime = 100000;
 
+
+    Events.on(engine, "collisionActive", function(events){
+        console.log('collision', events.pairs[0].collision);
+        console.log('pair.bodyA.goRef.type', events.pairs[0].bodyA.goRef.type);
+        console.log('pair.bodyB.goRef.type', events.pairs[0].bodyB.goRef.type);
+        events.pairs.forEach(function(pair){
+
+            if ((pair.bodyA.goRef.type === 'FLAK' && pair.bodyB.goRef.type === 'BOMBER')||(pair.bodyA.goRef.type === 'BOMBER' && pair.bodyB.goRef.type === 'FLAK')){
+                var bomber = (pair.bodyA.goRef.type === 'BOMBER') ? pair.bodyA.goRef : pair.bodyB.goRef;
+                var flak = (pair.bodyA.goRef.type === 'FLAK') ? pair.bodyA.goRef : pair.bodyB.goRef;
+                console.log('hit');
+                bomber.health -= flak.damage;
+                flak.fuse -= 1000;
+                AttackCtrl.saveAttack({
+                    game: bomber.game.gameId,
+                    type: "FLAK HIT",
+                    owner: flak.owner.username,
+                    target: bomber.owner.username,
+                    x: flak.getX().toFixed(5),
+                    y: flak.getY().toFixed(5)
+                });
+
+                if (bomber.health <= 0){
+                    flak.owner.score += 1;
+                    AttackCtrl.saveAttack({
+                        game: bomber.game.gameId,
+                        type: "BOMBER DESTROYED",
+                        owner: flak.owner.username,
+                        target: bomber.owner.username,
+                        asset: flak.playerId,
+                        x: bomber.getX().toFixed(5),
+                        y: bomber.getY().toFixed(5)
+                    });
+                }
+            }else if (pair.bodyA.goRef.type === 'BOMB' || pair.bodyA.goRef.type === 'BOMB'){
+                var bomb = (pair.bodyA.goRef.type === 'BOMB') ? pair.bodyA.goRef : pair.bodyB.goRef;
+                var target = (pair.bodyA.goRef.type !== 'BOMB') ? pair.bodyA.goRef : pair.bodyB.goRef;
+
+                console.log('bomb hit');
+                bomb.owner.points += 5;
+                target.health -= bomb.damage;
+                AttackCtrl.saveAttack({
+                    game: target.game.gameId,
+                    type: "BOMB HIT " + target.type,
+                    owner: bomb.owner.username,
+                    target: target.username || target.owner.username,
+                    x: bomb.getX(),
+                    y: bomb.getY()
+                });
+
+                if (cp.health <= 0){
+                    cp.health = 0;
+                    AttackCtrl.saveAttack({
+                        game: target.game.gameId,
+                        type: target.type + " DESTROYED",
+                        owner: bomb.owner.username,
+                        asset: bomb.droppedBy.id,
+                        x: cp.getX(),
+                        y: cp.getY()
+                    });
+
+                }
+            }
+        });
+
+
+    });
+
     game =  {
         gameId: id,
         socketHandler: socketHandler,
@@ -197,84 +266,84 @@ exports.create = function(id, socketHandler, dbHandler){
                     console.log('fire in the hole!');
                     console.log('x', bomb.getX());
                     console.log('y', bomb.getY());
-                    self.explosions.push(ObjectFactory.createExplosion(bomb.getX(),bomb.getY(), bomb.blast_radius));
+                    self.explosions.push(ObjectFactory.createExplosion(bomb.getX(),bomb.getY(), bomb.blast_radius, self));
                     console.log('explosions:', self.explosions);
-                    self.playerEntities.forEach(function(playEnt){
-                        if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
-                            console.log('hit');
-                            bomb.owner.points += 5;
-                            playEnt.health -= bomb.damage;
-                            AttackCtrl.saveAttack({
-                                game: self.gameId,
-                                type: "BOMB HIT PLAYER",
-                                owner: bomb.owner.username,
-                                target: playEnt.username,
-                                x: bomb.getX(),
-                                y: bomb.getY()
-                            });
-
-                        }
-                    });
-                    self.AAbatterys.forEach(function(aaBattery){
-                        if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
-                            console.log('hit');
-                            bomb.owner.points += 1;
-                            aaBattery.health -= bomb.damage;
-                            AttackCtrl.saveAttack({
-                                game: self.gameId,
-                                type: "BOMB HIT MOBILE AA",
-                                owner: bomb.owner.username,
-                                target: aaBattery.owner.username,
-                                x: bomb.getX(),
-                                y: bomb.getY()
-                            });
-
-                            if (aaBattery.health <= 0){
-                                AttackCtrl.saveAttack({
-                                    game: self.gameId,
-                                    type: "MOBILE AA DESTROYED",
-                                    owner: bomb.owner.username,
-                                    target: aaBattery.owner.username,
-                                    asset: bomb.droppedBy.id,
-                                    x: aaBattery.getX(),
-                                    y: aaBattery.getY()
-                                });
-
-                            }
-
-                        }
-                    });
-
-                    self.controlPoints.forEach(function(cp){
-                        if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
-                            console.log('hit');
-                            if (cp.owner){
-                                bomb.owner.points += 1;
-                            }
-                            cp.hit(bomb.damage);
-                            AttackCtrl.saveAttack({
-                                game: self.gameId,
-                                type: "BOMB HIT CONTROL POINT",
-                                owner: bomb.owner.username,
-                                x: bomb.getX(),
-                                y: bomb.getY()
-                            });
-
-                            if (cp.health <= 0){
-                                cp.health = 0;
-                                AttackCtrl.saveAttack({
-                                    game: self.gameId,
-                                    type: "CONTROL POINT DESTROYED",
-                                    owner: bomb.owner.username,
-                                    asset: bomb.droppedBy.id,
-                                    x: cp.getX(),
-                                    y: cp.getY()
-                                });
-
-                            }
-
-                        }
-                    });
+                    // self.playerEntities.forEach(function(playEnt){
+                    //     if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
+                    //         console.log('hit');
+                    //         bomb.owner.points += 5;
+                    //         playEnt.health -= bomb.damage;
+                    //         AttackCtrl.saveAttack({
+                    //             game: self.gameId,
+                    //             type: "BOMB HIT PLAYER",
+                    //             owner: bomb.owner.username,
+                    //             target: playEnt.username,
+                    //             x: bomb.getX(),
+                    //             y: bomb.getY()
+                    //         });
+                    //
+                    //     }
+                    // });
+                    // self.AAbatterys.forEach(function(aaBattery){
+                    //     if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
+                    //         console.log('hit');
+                    //         bomb.owner.points += 1;
+                    //         aaBattery.health -= bomb.damage;
+                    //         AttackCtrl.saveAttack({
+                    //             game: self.gameId,
+                    //             type: "BOMB HIT MOBILE AA",
+                    //             owner: bomb.owner.username,
+                    //             target: aaBattery.owner.username,
+                    //             x: bomb.getX(),
+                    //             y: bomb.getY()
+                    //         });
+                    //
+                    //         if (aaBattery.health <= 0){
+                    //             AttackCtrl.saveAttack({
+                    //                 game: self.gameId,
+                    //                 type: "MOBILE AA DESTROYED",
+                    //                 owner: bomb.owner.username,
+                    //                 target: aaBattery.owner.username,
+                    //                 asset: bomb.droppedBy.id,
+                    //                 x: aaBattery.getX(),
+                    //                 y: aaBattery.getY()
+                    //             });
+                    //
+                    //         }
+                    //
+                    //     }
+                    // });
+                    //
+                    // self.controlPoints.forEach(function(cp){
+                    //     if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
+                    //         console.log('hit');
+                    //         if (cp.owner){
+                    //             bomb.owner.points += 1;
+                    //         }
+                    //         cp.hit(bomb.damage);
+                    //         AttackCtrl.saveAttack({
+                    //             game: self.gameId,
+                    //             type: "BOMB HIT CONTROL POINT",
+                    //             owner: bomb.owner.username,
+                    //             x: bomb.getX(),
+                    //             y: bomb.getY()
+                    //         });
+                    //
+                    //         if (cp.health <= 0){
+                    //             cp.health = 0;
+                    //             AttackCtrl.saveAttack({
+                    //                 game: self.gameId,
+                    //                 type: "CONTROL POINT DESTROYED",
+                    //                 owner: bomb.owner.username,
+                    //                 asset: bomb.droppedBy.id,
+                    //                 x: cp.getX(),
+                    //                 y: cp.getY()
+                    //             });
+                    //
+                    //         }
+                    //
+                    //     }
+                    // });
 
                     //    remove bomb
 
@@ -296,39 +365,39 @@ exports.create = function(id, socketHandler, dbHandler){
         updateFlaks: function(dt){
             var self = this;
             self.flaks.forEach(function(flak, i){
-                console.log('updating a flak');
+                // console.log('updating a flak');
                 if (flak.state === 'live'){
                     flak.update(dt);
-                    self.bombers.forEach(function(bomber){
-                        if (checkCollisions(flak.getPosition(), bomber.getPosition(), 10)){
-                            console.log('hit');
-                            bomber.health -= flak.damage;
-                            AttackCtrl.saveAttack({
-                                game: self.gameId,
-                                type: "FLAK HIT",
-                                owner: flak.owner.username,
-                                target: bomber.owner.username,
-                                x: flak.getX().toFixed(5),
-                                y: flak.getY().toFixed(5)
-                            });
-
-                            if (bomber.health <= 0){
-                                flak.owner.score += 1;
-                                AttackCtrl.saveAttack({
-                                    game: self.gameId,
-                                    type: "BOMBER DESTROYED",
-                                    owner: flak.owner.username,
-                                    target: bomber.owner.username,
-                                    asset: flak.firedBy.id,
-                                    x: bomber.getX().toFixed(5),
-                                    y: bomber.getY().toFixed(5)
-                                });
-                            }
-                            // remove flak from here, but also from Engine!
-                            self.World.remove(engine.world, flak.physical);
-                            self.flaks.splice(i, 1);
-                        }
-                    });
+                    // self.bombers.forEach(function(bomber){
+                    //     if (checkCollisions(flak.getPosition(), bomber.getPosition(), 0.1)){
+                    //         console.log('hit');
+                    //         bomber.health -= flak.damage;
+                    //         AttackCtrl.saveAttack({
+                    //             game: self.gameId,
+                    //             type: "FLAK HIT",
+                    //             owner: flak.owner.username,
+                    //             target: bomber.owner.username,
+                    //             x: flak.getX().toFixed(5),
+                    //             y: flak.getY().toFixed(5)
+                    //         });
+                    //
+                    //         if (bomber.health <= 0){
+                    //             flak.owner.score += 1;
+                    //             AttackCtrl.saveAttack({
+                    //                 game: self.gameId,
+                    //                 type: "BOMBER DESTROYED",
+                    //                 owner: flak.owner.username,
+                    //                 target: bomber.owner.username,
+                    //                 asset: flak.playerId,
+                    //                 x: bomber.getX().toFixed(5),
+                    //                 y: bomber.getY().toFixed(5)
+                    //             });
+                    //         }
+                    //         // remove flak from here, but also from Engine!
+                    //         self.World.remove(engine.world, flak.physical);
+                    //         self.flaks.splice(i, 1);
+                    //     }
+                    // });
                 }else{
                     console.log('removing flak ', i);
                     self.flaks.splice(i, 1);
