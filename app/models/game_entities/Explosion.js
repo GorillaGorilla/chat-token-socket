@@ -8,11 +8,14 @@ var GameObject = require('./gameobject.class'),
 
 
 class Explosion extends GameObject{
-    constructor(x, y, radius){
+    constructor(x, y, radius, game){
         super(x, y);
         this.fuse = 2000;
         this.initialFuse = 2000;
+
+        this.physical.goRef = this;
         this.radius = radius;
+        this.type = 'EXPLOSION';
         this.physical.collisionFilter.group = 0;
         this.physical.collisionFilter.category = Map.EXPLOSION;
         // single pipe is bitwise ADD
@@ -32,6 +35,7 @@ class Explosion extends GameObject{
 
     createClone(){
         var clone = super.createClone();
+        console.log('clone', clone);
         return clone;
     }
 }

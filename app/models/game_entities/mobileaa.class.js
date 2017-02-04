@@ -157,7 +157,7 @@ class MobileAA extends PlayerAsset {
         var normal = Vector.normalise(posToDestination);
         // console.log('normal', normal);
         var velocity = Vector.mult(normal, 10);
-        var newVel = Vector.add(velocity, Vector.create((Math.random()*3)-1.5, (Math.random()*3)-1.5));
+        var newVel = Vector.add(velocity, Vector.create((Math.random())-0.5, (Math.random())-0.5));
         var flak = Flak.newFlak(this.getX(), this.getY(), newVel, this.game, self);
         this.game.addFlak(flak);
         console.log("flak added");

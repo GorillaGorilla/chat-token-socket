@@ -20,7 +20,9 @@ class Flak extends GameObject{
         this.type = "FLAK";
         this.fuse = 3000;
         this.damage = 2;
+        this.health = 5;
         this.state = 'live';
+        this.physical.goRef = this; // this cannot be done up the heirarchy as I am overwriting the phyiscal.
         this.owner = parentBattery.owner;
         this.physical.collisionFilter.group = 0;
         this.playerId = parentBattery.owner.id;
@@ -31,7 +33,6 @@ class Flak extends GameObject{
         console.log('FLAK collisionFilter.category: ', this.physical.collisionFilter.category);
         console.log('FLAK collisionFilter.mask: ', this.physical.collisionFilter.mask);
         this.setVelocity(velocity);
-        Body.setVelocity(this.physical, velocity);  //other one isnt working soo......?
         game.World.add(game.engine.world, this.physical);
     }
 
@@ -42,10 +43,6 @@ class Flak extends GameObject{
             this.state = 'expired';
         }
     }
-
-    setVelocity(vector) {
-        Body.setVelocity(this.physical, vector);
-    };
 
     createClone(){
         var clone = super.createClone();

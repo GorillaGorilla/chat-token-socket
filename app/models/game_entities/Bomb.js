@@ -29,7 +29,7 @@ exports.newBomb = function(x, y, parentAsset){
     bomb.getX = function(){return this.physical.position.x};
     bomb.getY = function(){return this.physical.position.y};
     bomb.getPosition = function(){return this.physical.position};
-
+    parentAsset.game.World.add(game.engine.world, this.physical);
     bomb.physical.collisionFilter.group = 0;
     bomb.physical.collisionFilter.category = Map.BOMB;
     // single pipe is bitwise ADD

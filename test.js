@@ -484,3 +484,58 @@ collisionActive event fired { pairs:
             collisionActive: [Object],
             collisionEnd: [] },
         metrics: { extended: false } } }
+
+
+
+
+{ pairs:
+    [ { id: '3203_3205',
+        bodyA: [Object],
+        bodyB: [Object],
+        contacts: [Object],
+        activeContacts: [Object],
+        separation: -0.19413484487014082,
+        isActive: true,
+        isSensor: false,
+        timeCreated: 4297.517559919527,
+        timeUpdated: 4315.498777388269,
+        inverseMass: 1362.1350930441245,
+        friction: 0.1,
+        frictionStatic: 0.5,
+        restitution: 0,
+        slop: 0.05,
+        collision: [Object] } ],
+        name: 'collisionActive',
+    source:
+    { positionIterations: 6,
+        velocityIterations: 4,
+        constraintIterations: 2,
+        enableSleeping: false,
+        events: [ collisionActive: [Object] ],
+        timing: { timestamp: 4315.498777388269, timeScale: 0.1 },
+        broadphase:
+        { controller: [Object],
+            detector: [Function],
+            buckets: [Object],
+            pairs: [Object],
+            pairsList: [Object],
+            bucketWidth: 48,
+            bucketHeight: 48 },
+        world:
+        { id: 3199,
+            type: 'composite',
+            parent: null,
+            isModified: false,
+            bodies: [Object],
+            constraints: [],
+            composites: [],
+            label: 'World',
+            gravity: [Object],
+            bounds: [Object] },
+        pairs:
+        { table: [Object],
+            list: [Object],
+            collisionStart: [],
+            collisionActive: [Object],
+            collisionEnd: [] },
+        metrics: { extended: false } } }
