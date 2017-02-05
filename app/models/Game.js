@@ -158,10 +158,11 @@ exports.create = function(id, socketHandler, dbHandler){
 
 
     Events.on(engine, "collisionActive", function(events){
-        console.log('collision', events.pairs[0].collision);
+        // console.log('collision', events.pairs[0].collision);
         console.log('pair.bodyA.goRef.type', events.pairs[0].bodyA.goRef.type);
         console.log('pair.bodyB.goRef.type', events.pairs[0].bodyB.goRef.type);
-        events.pairs.forEach(function(pair){
+        var explosions = {};
+        events.pairs.forEach(function(pair, i){
 
             if ((pair.bodyA.goRef.type === 'FLAK' && pair.bodyB.goRef.type === 'BOMBER')||(pair.bodyA.goRef.type === 'BOMBER' && pair.bodyB.goRef.type === 'FLAK')){
                 var bomber = (pair.bodyA.goRef.type === 'BOMBER') ? pair.bodyA.goRef : pair.bodyB.goRef;
@@ -190,36 +191,45 @@ exports.create = function(id, socketHandler, dbHandler){
                         y: bomber.getY().toFixed(5)
                     });
                 }
-            }else if (pair.bodyA.goRef.type === 'BOMB' || pair.bodyA.goRef.type === 'BOMB'){
-                var bomb = (pair.bodyA.goRef.type === 'BOMB') ? pair.bodyA.goRef : pair.bodyB.goRef;
-                var target = (pair.bodyA.goRef.type !== 'BOMB') ? pair.bodyA.goRef : pair.bodyB.goRef;
-
-                console.log('bomb hit');
-                bomb.owner.points += 5;
-                target.health -= bomb.damage;
-                AttackCtrl.saveAttack({
-                    game: target.game.gameId,
-                    type: "BOMB HIT " + target.type,
-                    owner: bomb.owner.username,
-                    target: target.username || target.owner.username,
-                    x: bomb.getX(),
-                    y: bomb.getY()
-                });
-
-                if (cp.health <= 0){
-                    cp.health = 0;
-                    AttackCtrl.saveAttack({
-                        game: target.game.gameId,
-                        type: target.type + " DESTROYED",
-                        owner: bomb.owner.username,
-                        asset: bomb.droppedBy.id,
-                        x: cp.getX(),
-                        y: cp.getY()
-                    });
-
-                }
+            }else if (pair.bodyA.goRef.type === 'EXPLOSION' || pair.bodyB.goRef.type === 'EXPLOSION'){
+                // console.log('explosion hit');
+                // var explosion = (pair.bodyA.goRef.type === 'EXPLOSION') ? pair.bodyA.goRef : pair.bodyB.goRef;
+                // var target = (pair.bodyA.goRef.type !== 'EXPLOSION') ? pair.bodyA.goRef : pair.bodyB.goRef;
+                //
+                //
+                // explosion.owner.points += 5;
+                // target.health -= explosion.damage;
+                // AttackCtrl.saveAttack({
+                //     game: target.game.gameId,
+                //     type: "BOMB HIT " + target.type,
+                //     owner: explosion.owner.username,
+                //     target: target.username || target.owner.username,
+                //     x: explosion.getX(),
+                //     y: explosion.getY()
+                // });
+                //
+                // if (target.health <= 0){
+                //     target.health = 0;
+                //     AttackCtrl.saveAttack({
+                //         game: target.game.gameId,
+                //         type: target.type + " DESTROYED",
+                //         owner: explosion.owner.username,
+                //         asset: explosion.droppedBy.id,
+                //         x: target.getX(),
+                //         y: target.getY()
+                //     });
+                //
+                // }
+                // // save ref to explosion for removal from physics engine after all pairs processed
+                // explosions[explosion.id] = explosion;
             }
         });
+
+        //all explosions that has collisions get removed from the phyisics engine
+        for (var expl in explosions){
+            game.World.remove(game.engine.world, explosions[expl].physical);
+        }
+
 
 
     });
@@ -266,86 +276,86 @@ exports.create = function(id, socketHandler, dbHandler){
                     console.log('fire in the hole!');
                     console.log('x', bomb.getX());
                     console.log('y', bomb.getY());
-                    self.explosions.push(ObjectFactory.createExplosion(bomb.getX(),bomb.getY(), bomb.blast_radius, self));
+                    self.explosions.push(ObjectFactory.createExplosion(bomb.getX(),bomb.getY(), bomb.blast_radius, bomb.owner));
                     console.log('explosions:', self.explosions);
-                    // self.playerEntities.forEach(function(playEnt){
-                    //     if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
-                    //         console.log('hit');
-                    //         bomb.owner.points += 5;
-                    //         playEnt.health -= bomb.damage;
-                    //         AttackCtrl.saveAttack({
-                    //             game: self.gameId,
-                    //             type: "BOMB HIT PLAYER",
-                    //             owner: bomb.owner.username,
-                    //             target: playEnt.username,
-                    //             x: bomb.getX(),
-                    //             y: bomb.getY()
-                    //         });
-                    //
-                    //     }
-                    // });
-                    // self.AAbatterys.forEach(function(aaBattery){
-                    //     if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
-                    //         console.log('hit');
-                    //         bomb.owner.points += 1;
-                    //         aaBattery.health -= bomb.damage;
-                    //         AttackCtrl.saveAttack({
-                    //             game: self.gameId,
-                    //             type: "BOMB HIT MOBILE AA",
-                    //             owner: bomb.owner.username,
-                    //             target: aaBattery.owner.username,
-                    //             x: bomb.getX(),
-                    //             y: bomb.getY()
-                    //         });
-                    //
-                    //         if (aaBattery.health <= 0){
-                    //             AttackCtrl.saveAttack({
-                    //                 game: self.gameId,
-                    //                 type: "MOBILE AA DESTROYED",
-                    //                 owner: bomb.owner.username,
-                    //                 target: aaBattery.owner.username,
-                    //                 asset: bomb.droppedBy.id,
-                    //                 x: aaBattery.getX(),
-                    //                 y: aaBattery.getY()
-                    //             });
-                    //
-                    //         }
-                    //
-                    //     }
-                    // });
-                    //
-                    // self.controlPoints.forEach(function(cp){
-                    //     if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
-                    //         console.log('hit');
-                    //         if (cp.owner){
-                    //             bomb.owner.points += 1;
-                    //         }
-                    //         cp.hit(bomb.damage);
-                    //         AttackCtrl.saveAttack({
-                    //             game: self.gameId,
-                    //             type: "BOMB HIT CONTROL POINT",
-                    //             owner: bomb.owner.username,
-                    //             x: bomb.getX(),
-                    //             y: bomb.getY()
-                    //         });
-                    //
-                    //         if (cp.health <= 0){
-                    //             cp.health = 0;
-                    //             AttackCtrl.saveAttack({
-                    //                 game: self.gameId,
-                    //                 type: "CONTROL POINT DESTROYED",
-                    //                 owner: bomb.owner.username,
-                    //                 asset: bomb.droppedBy.id,
-                    //                 x: cp.getX(),
-                    //                 y: cp.getY()
-                    //             });
-                    //
-                    //         }
-                    //
-                    //     }
-                    // });
+                    self.playerEntities.forEach(function(playEnt){
+                        if (checkCollisions(bomb.getPosition(), playEnt.physical.position, bomb.blast_radius)){
+                            console.log('hit');
+                            bomb.owner.points += 5;
+                            playEnt.health -= bomb.damage;
+                            AttackCtrl.saveAttack({
+                                game: self.gameId,
+                                type: "BOMB HIT PLAYER",
+                                owner: bomb.owner.username,
+                                target: playEnt.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
 
-                    //    remove bomb
+                        }
+                    });
+                    self.AAbatterys.forEach(function(aaBattery){
+                        if (checkCollisions(bomb.getPosition(), aaBattery.getPosition(), bomb.blast_radius)){
+                            console.log('hit');
+                            bomb.owner.points += 1;
+                            aaBattery.health -= bomb.damage;
+                            AttackCtrl.saveAttack({
+                                game: self.gameId,
+                                type: "BOMB HIT MOBILE AA",
+                                owner: bomb.owner.username,
+                                target: aaBattery.owner.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
+
+                            if (aaBattery.health <= 0){
+                                AttackCtrl.saveAttack({
+                                    game: self.gameId,
+                                    type: "MOBILE AA DESTROYED",
+                                    owner: bomb.owner.username,
+                                    target: aaBattery.owner.username,
+                                    asset: bomb.droppedBy.id,
+                                    x: aaBattery.getX(),
+                                    y: aaBattery.getY()
+                                });
+
+                            }
+
+                        }
+                    });
+
+                    self.controlPoints.forEach(function(cp){
+                        if (checkCollisions(bomb.getPosition(), cp.getPosition(), bomb.blast_radius)){
+                            console.log('hit');
+                            if (cp.owner){
+                                bomb.owner.points += 1;
+                            }
+                            cp.hit(bomb.damage);
+                            AttackCtrl.saveAttack({
+                                game: self.gameId,
+                                type: "BOMB HIT CONTROL POINT",
+                                owner: bomb.owner.username,
+                                x: bomb.getX(),
+                                y: bomb.getY()
+                            });
+
+                            if (cp.health <= 0){
+                                cp.health = 0;
+                                AttackCtrl.saveAttack({
+                                    game: self.gameId,
+                                    type: "CONTROL POINT DESTROYED",
+                                    owner: bomb.owner.username,
+                                    asset: bomb.droppedBy.id,
+                                    x: cp.getX(),
+                                    y: cp.getY()
+                                });
+
+                            }
+
+                        }
+                    });
+
+                       // remove bomb
 
                     self.bombs.splice(i, 1);
 

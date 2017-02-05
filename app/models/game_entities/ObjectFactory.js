@@ -5,6 +5,6 @@
 
 var Explosion = require('./Explosion');
 
-exports.createExplosion = function(x, y, radius, game){
-    return new Explosion(x, y, radius, game);
+exports.createExplosion = function(x, y, radius, owner){
+    return new Explosion(x, y, radius, owner);
 };

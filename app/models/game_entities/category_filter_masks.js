@@ -9,6 +9,6 @@ module.exports = {
     MOBILE_AA : 0x0002,
     FLAK : 0x0004,
     BOMBER : 0x0008,
-    BOMB : 0x0010,
-    EXPLOSION : 0x0020
+    EXPLOSION : 0x0010,
+    BOMB : 0x0020
 };

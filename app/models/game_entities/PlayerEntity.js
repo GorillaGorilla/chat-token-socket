@@ -32,6 +32,8 @@ class PlayerEntity extends GameObject {
         this.AAbatterys= [];
         this.AA_lost = 0;
         this.bombers_lost = 0;
+        this.type = 'PLAYER';
+        Body.setStatic(this.physical, true);
 
         game.World.add(game.engine.world, this.physical);
         this.physical.collisionFilter.group = 0;
