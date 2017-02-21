@@ -1,1 +1,1 @@
-Server to test native chat app.
+Server for location based real-time strategy game.

@@ -24,8 +24,8 @@ class Bomber extends PlayerAsset {
         this.physical.collisionFilter.category = Map.BOMBER;
         // single pipe is bitwise ADD
         this.physical.collisionFilter.mask = Map.FLAK;
-        console.log('BOMBER collisionFilter.category: ', this.physical.collisionFilter.category);
-        console.log('BOMBER collisionFilter.mask: ', this.physical.collisionFilter.mask);
+        // console.log('BOMBER collisionFilter.category: ', this.physical.collisionFilter.category);
+        // console.log('BOMBER collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     setTarget(x, y){

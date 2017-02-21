@@ -38,10 +38,10 @@ class PlayerEntity extends GameObject {
         game.World.add(game.engine.world, this.physical);
         this.physical.collisionFilter.group = 0;
         this.physical.collisionFilter.category = Map.PLAYER;
-        console.log('Player collisionFilter.category: ', this.physical.collisionFilter.category);
+        // console.log('Player collisionFilter.category: ', this.physical.collisionFilter.category);
         // single pipe is bitwise ADD
         this.physical.collisionFilter.mask = Map.EXPLOSION ;
-        console.log('Player collisionFilter.mask: ', this.physical.collisionFilter.mask);
+        // console.log('Player collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     get gameId(){

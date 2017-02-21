@@ -30,8 +30,8 @@ class Flak extends GameObject{
 
         // single & is bitwise ADD
         this.physical.collisionFilter.mask = Map.BOMBER;
-        console.log('FLAK collisionFilter.category: ', this.physical.collisionFilter.category);
-        console.log('FLAK collisionFilter.mask: ', this.physical.collisionFilter.mask);
+        // console.log('FLAK collisionFilter.category: ', this.physical.collisionFilter.category);
+        // console.log('FLAK collisionFilter.mask: ', this.physical.collisionFilter.mask);
         this.setVelocity(velocity);
         game.World.add(game.engine.world, this.physical);
     }

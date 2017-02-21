@@ -34,7 +34,11 @@ describe('testing the conversion from LatLng into metres',function(){
         proj.mapsToMetres(test);
         expect(test).not.to.equal(p1);
         proj.metresToMaps(test);
-        expect(test).to.roughly.deep.equal(p1);
+        console.log('test', Object.keys(test));
+        console.log('p1', Object.keys(p1));
+        expect(test.x).to.roughly.equal(p1.x);
+        expect(test.y).to.roughly.equal(p1.y);
+        expect(test.z).to.roughly.equal(p1.z);
     });
 
     it('should correctly calculate the distance between p1 and p2 as abot 72 km',function(){
