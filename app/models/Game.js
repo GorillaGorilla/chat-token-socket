@@ -27,7 +27,7 @@ var RENDER_TIME = 200,
 var lastTime = 0;
 var frame_time = 45000000;
 requestUpdateFrame = function (game,  callback, AttackCtrl) {
-    console.log('RequestUpdateFrame called');
+    // console.log('RequestUpdateFrame called');
     // debug('RequestUpdateFrame called');
     // debug('lastTime', lastTime);
     var currTime = getNanoTime(),
@@ -474,7 +474,7 @@ exports.create = function(id, socketHandler, dbHandler){
 
         update : function (t){
             var self = this;
-            console.log('update called', t, self.gameId);
+            // console.log('update called', t, self.gameId);
             // debug("update called", t);
             // debug("update called getNano", getNanoTime());
             var dt = (t - this.lastUpdateTime); // used to be 1000000000
@@ -539,7 +539,7 @@ exports.create = function(id, socketHandler, dbHandler){
                 render(this, nextState);
             }
             if (this.running){
-                console.log("running is true");
+                // console.log("running is true");
                 debug("running is true");
                 requestUpdateFrame(self, self.update.bind(self));
             }
@@ -590,7 +590,7 @@ exports.create = function(id, socketHandler, dbHandler){
             });
         },
         handleLocations: function(){
-            console.log('handle locations');
+            // console.log('handle locations');
             var self = this;
             // console.log('handleLocations called',self.gameId, self.new_locations);
             self.playerEntities.forEach(function(playEnt){
