@@ -79,14 +79,15 @@ module.exports = function(io, client) {
             // crashed once at char54...why??
             GameServer.getPlayerGame(client.username).controlPoints.forEach(function(cp){
                 if(cp.owner){
-                    console.log('gamelobby cp', cp.name, cp.y, cp.x);
+
                 }
+                console.log('gamelobby cp', cp.name, cp.y, cp.x);
                 var clone = cp.createClone();
                 proj.metresToMaps(clone);
                 if(clone.owner){
-                    console.log('gamelobby cp', clone.name, clone.y, clone.x);
-                }
 
+                }
+                console.log('gamelobby cp', clone.name, clone.y, clone.x);
                 if (clone)
                 points.push(clone);
             });

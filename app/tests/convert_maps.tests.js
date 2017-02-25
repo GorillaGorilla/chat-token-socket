@@ -29,6 +29,24 @@ console.log('pointsConverted', points);
 
 describe('testing the conversion from LatLng into metres',function(){
 
+    it('x value should not be the same after conversion', function(){
+        var test = JSON.parse(JSON.stringify(p1));
+        // console.log('test.x', test.x);
+        // console.log('p1.x', p1.x);
+        proj.mapsToMetres(test);
+        expect(test.x).not.to.equal(p1.x);
+        expect(test.x).not.to.roughly.equal(p1.x/10);
+        expect(test.x).not.to.roughly.equal(p1.x*10);
+        // console.log('test.x', test.x);
+        // console.log('p1.x', p1.x);
+        proj.metresToMaps(test);
+        // console.log('test', Object.keys(test));
+        // console.log('p1', Object.keys(p1));
+        expect(test.x).to.roughly.equal(p1.x);
+        expect(test.y).to.roughly.equal(p1.y);
+        expect(test.z).to.roughly.equal(p1.z);
+    });
+
     it('should be able to convert from latlng to metres and back and get the same value at the end', function(){
         var test = JSON.parse(JSON.stringify(p1));
         proj.mapsToMetres(test);
@@ -41,14 +59,14 @@ describe('testing the conversion from LatLng into metres',function(){
         expect(test.z).to.roughly.equal(p1.z);
     });
 
-    it('should correctly calculate the distance between p1 and p2 as abot 72 km',function(){
-        var test1 = JSON.parse(JSON.stringify(p1));
-        var test2 = JSON.parse(JSON.stringify(p2));
-        proj.mapsToMetres(test1);
-        proj.mapsToMetres(test2);
-        var diff = proj.distanceBetweenMetres(test1, test2);
-        console.log('diff: ', diff);
-    });
+    // it('should correctly calculate the distance between p1 and p2 as abot 72 km',function(){
+    //     var test1 = JSON.parse(JSON.stringify(p1));
+    //     var test2 = JSON.parse(JSON.stringify(p2));
+    //     proj.mapsToMetres(test1);
+    //     proj.mapsToMetres(test2);
+    //     var diff = proj.distanceBetweenMetres(test1, test2);
+    //     console.log('diff: ', diff);
+    // });
 
 
 
