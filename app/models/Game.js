@@ -595,9 +595,10 @@ exports.create = function(id, socketHandler, dbHandler){
             // console.log('handleLocations called',self.gameId, self.new_locations);
             self.playerEntities.forEach(function(playEnt){
                 if (self.new_locations[playEnt.username]){
-                    console.log('playEnt has location');
+                    console.log('playEnt has location', playEnt.username, self.new_locations[playEnt.username]);
                     proj.mapsToMetres(self.new_locations[playEnt.username]);
-                    // console.log('proj.x', self.new_locations[playEnt.userId].x);
+                    console.log('proj.x', self.new_locations[playEnt.username].x);
+                    console.log('proj.x', self.new_locations[playEnt.username].y);
                     playEnt.setPosition(self.new_locations[playEnt.username].x, self.new_locations[playEnt.username].y);
                     if (playEnt.state === 'living'){
                         self.controlPoints.forEach(function(cp){
