@@ -22,10 +22,12 @@ class Bomber extends PlayerAsset {
         owner.sendBomberAccounting(this);
         this.physical.collisionFilter.group = 0;
         this.physical.collisionFilter.category = Map.BOMBER;
+        this.state = 'attack';
+        // simple way of simulating flying height
+        this.climbSpeed = 0.100;
+        this.altitude = 0;
         // single pipe is bitwise ADD
         this.physical.collisionFilter.mask = Map.FLAK;
-        // console.log('BOMBER collisionFilter.category: ', this.physical.collisionFilter.category);
-        // console.log('BOMBER collisionFilter.mask: ', this.physical.collisionFilter.mask);
     }
 
     setTarget(x, y){
@@ -44,6 +46,15 @@ class Bomber extends PlayerAsset {
         self.setRoutine(Routines.goTo(x, y, self));
     }
 
+    takeDamage(damage){
+        var self = this;
+        if(self.altitude < 1000){
+            return self.health -= (damage * 2);
+        }else {
+            return self.health -= damage;
+        }
+    }
+
     update(dt){
         var self = this;
         // console.log('update bomber');
@@ -51,9 +62,13 @@ class Bomber extends PlayerAsset {
             self.owner.bomber_in_action --;
             return self.running = false;
         }
+
+        if (self.altitude < 1000){
+            self.altitude += self.climbSpeed * dt;
+        }
         self.routine(dt);
 
-        if (this.state ==='attack' && self.target && self.atTarget()){
+        if ((this.state ==='attack'|| this.state ==='takeoff') && self.target && self.atTarget()){
             console.log('---------------------------------------- at target');
             self.dropBomb();
             //    setTarget = null;
@@ -69,6 +84,10 @@ class Bomber extends PlayerAsset {
             self.running = false;
             // game.World.engine
         }
+
+        self.flyingTime += dt;
+
+
         // this.lastDt = dt;
         // this.lastPos.x = this.getX();
         // this.lastPos.y = this.getY();

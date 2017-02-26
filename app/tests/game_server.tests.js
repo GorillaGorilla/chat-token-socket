@@ -164,8 +164,8 @@ describe('GameServer tests', function(){
                 var playerEnt = GameServer.games[gameId].getPlayerEntity(player1.username);
                 var position = {x: playerEnt.getX(), y: playerEnt.getY()};
                 // because in the tests the object is passed by reference, rather than by the event,
-                // so the transformation that server does from latlng to metres is reflected in the orriginal object.
-                // to test therefore it must be converted back - must be careful because this may be interefering
+                // so the transformation that server does from latlng to metres is reflected in the original object.
+                // to test therefore it must be converted back - must be careful because this may be interfering
                 // with the state as stored on the server as well!
                 console.log('playerEnt', playerEnt);
                 console.log('position', position);

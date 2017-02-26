@@ -40,12 +40,46 @@ describe('Testing Bomberclass', function() {
     it('should return the correct owner', function () {
         bomber.getOwner().should.equal(fakeOwner);
     });
-    it('should be create in position x and y', function () {
+    it('should be created in position x and y', function () {
         bomber.getX().should.equal(x);
         bomber.getY().should.equal(y);
     });
     it('atBase function should return true on initialisation', function () {
         bomber.atBase().should.equal(true);
+    });
+
+    it('state should be "attack" when initialised', function () {
+        bomber.state.should.equal('attack');
+    });
+
+    it('altitude should be 0 when created', function () {
+        bomber.altitude.should.equal(0);
+    });
+
+    it('bomber should have method takeDamage', function () {
+        var isThere = (typeof bomber.takeDamage) === 'function';
+        isThere.should.equal(true);
+    });
+
+    it('takeDamage should descrease health by the value passed in when altitude > 1000', function () {
+        var initialhealth = bomber.health;
+        bomber.altitude = 1001;
+        bomber.takeDamage(5);
+        bomber.health.should.equal(initialhealth - 5);
+    });
+
+    it('takeDamage should descrease health by the double the value passed in when altitude < 1000', function () {
+        var initialhealth = bomber.health;
+        bomber.altitude = 999.9;
+        bomber.takeDamage(5);
+        bomber.health.should.equal(initialhealth - (5*2));
+    });
+
+    it('takeDamage should descrease health by the value passed in when altitude === 1000', function () {
+        var initialhealth = bomber.health;
+        bomber.altitude = 1000;
+        bomber.takeDamage(5);
+        bomber.health.should.equal(initialhealth - 5);
     });
 
     it('should have a createClone method that makes a copy without physical',function(){
@@ -83,6 +117,19 @@ describe('Testing Bomberclass', function() {
         game.bombs.should.have.length(0);
         bomber.dropBomb();
         game.bombs.should.have.length(1);
+    });
+
+    it('should call update and take a time in ms', function () {
+        bomber.update(1000);
+        bomber.altitude.should.equal(100);
+    });
+
+    it('should be below altitude and take increased damage soon after takeoff', function () {
+        var initialHealth = bomber.health;
+        bomber.update(1000);
+        bomber.altitude.should.equal(100);
+        bomber.takeDamage(5);
+        bomber.health.should.equal(initialHealth - (5 * 2));
     });
 
     it('should be able to set a target', function () {

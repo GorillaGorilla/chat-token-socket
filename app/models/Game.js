@@ -169,7 +169,7 @@ exports.create = function(id, socketHandler, dbHandler){
                 var bomber = (pair.bodyA.goRef.type === 'BOMBER') ? pair.bodyA.goRef : pair.bodyB.goRef;
                 var flak = (pair.bodyA.goRef.type === 'FLAK') ? pair.bodyA.goRef : pair.bodyB.goRef;
                 console.log('hit');
-                bomber.health -= flak.damage;
+                bomber.takeDamage(flak.damage);
                 flak.fuse -= 1000;
                 AttackCtrl.saveAttack({
                     game: bomber.game.gameId,
