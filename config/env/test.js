@@ -4,5 +4,5 @@
 "use strict";
 module.exports = {
     db: 'mongodb://localhost/game-token-test',
-    sessionSecret: 'Your Application Session Secret'
+    sessionSecret: 'freebsdtestsecret'
 };

@@ -92,7 +92,6 @@ describe('Testing Bomberclass', function() {
         clone.x.should.equal(x);
         clone.y.should.equal(y);
         clone.type.should.equal('BOMBER');
-
     });
 
     it('checkCollisionObj function should return true', function () {
