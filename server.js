@@ -102,30 +102,5 @@ try {
         if(err) return console.log("Pretty fucked now, nothing to catch this.. \n", err);
         console.log(error_report);
     });
-
-    var mailer = require('nodemailer');
-    // var mailTransport = mailer.createTransport({
-    //     service: 'gmail',
-    //     auth: {
-    //         user: 'youremail@gmail.com',
-    //         pass: '' //you need to create an app password in gmail for this => https://myaccount.google.com/apppasswords
-    //     }
-    // });
-
-    var mailTransport = mailer.createTransport('smtps://palanalst@gmail.com:89Palbert@smtp.gmail.com');
-
-    var mailOptions = {
-        from: 'Server <server@gameapp.com>', // sender address
-        to: 'fm8pref9@gmail.com', // list of receivers
-        subject: 'Crash Report', // Subject line
-        text: error_report
-    };
-
-    mailTransport.sendMail(mailOptions, function(error, info) {
-        if (error) {
-            return console.log(error);
-        }
-        console.log('Message %s sent: %s', info.messageId, info.response);
-    });
 }
 

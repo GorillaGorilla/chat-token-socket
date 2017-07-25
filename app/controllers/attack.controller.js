@@ -1,7 +1,7 @@
 /**
  * Created by frederickmacgregor on 26/12/2016.
  */
-Attack = require('mongoose').model('Attack');
+const Attack = require('mongoose').model('Attack');
 
 
 exports.getRecentAttacks = function(input, callback){

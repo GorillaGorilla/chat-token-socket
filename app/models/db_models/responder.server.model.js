@@ -3,7 +3,7 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 // Thanks to http://blog.matoski.com/articles/jwt-express-node-mongoose/
 

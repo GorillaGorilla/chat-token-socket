@@ -6,3 +6,5 @@ applications:
   name: socket-token
   host: socket-token
   disk_quota: 1024M
+  services:
+     - jdw-mongo
