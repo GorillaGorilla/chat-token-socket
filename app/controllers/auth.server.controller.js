@@ -15,7 +15,7 @@ var Responder = require('mongoose').model('Responder'),
 exports.signup = function(req, res, next){
     console.log("signup called");
     if (!req.body.name || !req.body.password) {
-        res.json({success: false, msg: 'Please pass name and password.'});
+        res.status(404).json({success: false, msg: 'Please pass name and password.'});
     } else {
         var newUser = new Responder({
             name: req.body.name,
@@ -48,7 +48,7 @@ exports.authenticate = function(req, res) {
 
         if (!user) {
             console.log("no user");
-            res.send({success: false, msg: 'Authentication failed. Responder not found.'});
+            res.status(404).send({success: false, msg: 'Authentication failed. User not found.'});
         } else {
             console.log("user found checking password");
             // check if password matches
@@ -67,9 +67,8 @@ exports.authenticate = function(req, res) {
                     // return the information including token as JSON
                     res.json({success: true, token: token, game_token: game_token, name: user.name});
                 } else {
-
                     console.log("compare password err: ", err);
-                    res.send({success: false, msg: 'Authentication failed. Wrong password.'});
+                    res.status(401).send({success: false, msg: 'Authentication failed. Wrong password.'});
                 }
             });
         }

@@ -8,7 +8,7 @@ proj = require('./convert_maps'),
 UUID = require('node-uuid'),
 debug = require('debug')('http'),
     GameFactory = require('../models/Game');
-    Matter = require('matter-js'),
+const    Matter = require('matter-js'),
     Engine = Matter.Engine,
     Bodies = Matter.Bodies,
     Vector = Matter.Vector,
@@ -16,7 +16,6 @@ debug = require('debug')('http'),
     PlayerFactory = require('../models/game_entities/PlayerEntity'),
     BomberFactory = require('../models/game_entities/Bomber'),
     BatteryFactory = require('../models/game_entities/AABattery'),
-        Attack = require('../models/db_models/Attack.model.js'),
     AttackCtrl = require('./attack.controller');
 
 
@@ -32,11 +31,7 @@ game_server.findGame = function(player){
             // console.log('dateFrom',dateFrom);
             // console.log('now', new Date());
 
-            Attack.find({occurred : { $gte : dateFrom} }, function(err, docs){
-                if(err){console.log('err', err)}
-                // console.log('attacks since disconnecting',docs); //prints empty arry []
-            });
-
+            AttackCtrl.getRecentAttacks(dateFrom);
             self.games[ent.gameId].socketHandler.addPlayer(player);
         //    in this case query db for all events since ent.disconnectedAt
 
@@ -127,7 +122,7 @@ game_server.reset = function(){
     //note that calls to update and gwt next frame will still be sitting on the event queue, so all games should be paused before deleting.
     var self = this;
     // console.log('GameServer.reset',this.games);
-    for (game in this.games){
+    for (let game in this.games){
         console.log(game);
         if (this.games[game]){
             this.games[game].pause();

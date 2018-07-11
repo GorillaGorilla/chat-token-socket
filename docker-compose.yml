@@ -1,10 +1,35 @@
-version: "2"
+version: "3"
 services:
-  web:
-    build: .
+  game:
+    image: gorillagorilla/map-game:v5
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 500M
     ports:
       - "3000:6001"
+    networks:
+      - gamenet
   mongo:
     image: mongo
     ports:
       - "27017:27017"
+    networks:
+      - gamenet
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - gamenet
+networks:
+  gamenet:

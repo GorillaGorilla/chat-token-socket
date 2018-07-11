@@ -11,5 +11,6 @@ angular.module('starter')
     // url: 'http://178.62.119.155:6001' // digital ocean
       // url: 'https://socket-token.mybluemix.net'
       // url: 'http://localhost:6017' // local
-      url: 'http://localhost:3000' //docker
+      // url: 'http://localhost:3000' //docker
+      url: '' //docker
   });

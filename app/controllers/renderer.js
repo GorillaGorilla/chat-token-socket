@@ -24,6 +24,10 @@ module.exports = function(game, nextState){
         assets.push(bomberState);
     });
     var playerStates = [];
+    // const playerStates = game.playerEntities.map((ent) => ({
+    //     money: Math.floor(ent.money),
+    //     score: Math.floor(ent.score),
+    // }));
     game.playerEntities.forEach(function(entity){
         var entityState = entity.createClone();
         entityState.money = Math.floor(entityState.money);
