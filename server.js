@@ -3,7 +3,7 @@
  */
 "use strict";
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
-
+const PORT = process.env.port || 3000;
 try {
     // throw new Error("Some error..."); // remove this once you're happy with it..
     var express     = require('express'),
@@ -24,7 +24,7 @@ try {
 
 
     var allowCrossDomain = function(req, res, next) {
-        res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+        res.header('Access-Control-Allow-Origin', 'http://localhost:3001');
         res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
         res.header('Access-Control-Allow-Headers', 'Content-Type');
         next();
@@ -87,10 +87,10 @@ try {
 
     require('./config/socket_config')(io);
 
-    var appEnv = cfenv.getAppEnv();
+    
 
-    server.listen(appEnv.port);
-    console.log('Server running at port: ' + appEnv.port);
+    server.listen(PORT);
+    console.log('Server running at port: ' + PORT);
     module.exports = server;
 } catch (e) {
     //this should catch all uncaught exceptions

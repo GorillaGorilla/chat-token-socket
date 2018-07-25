@@ -86,7 +86,8 @@ exports.create = function(id, socketHandler, dbHandler){
                 }
             },
             emit :function(name, event, msg){
-                this.players[name].emit(event, msg);
+                let newBuff = Buffer.from(JSON.stringify(msg));
+                this.players[name].emit(event, newBuff);
             },
             removePlayer : function(player){
                 delete this.players[player.username];

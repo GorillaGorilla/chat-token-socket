@@ -52,7 +52,7 @@ game_server.findGame = function(player){
 
 game_server.getPlayerGame = function(playerName){
     var self = this;
-    for (gameId in self.games){
+    for (const gameId in self.games){
         if (self.getGame(gameId).getPlayerEntity(playerName)){
             return self.getGame(gameId);
         }
