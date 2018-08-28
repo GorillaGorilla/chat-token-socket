@@ -26,6 +26,7 @@ class Bomber extends PlayerAsset {
         // simple way of simulating flying height
         this.climbSpeed = 0.100;
         this.altitude = 0;
+        this.flyingTime = 0;
         // single pipe is bitwise ADD
         this.physical.collisionFilter.mask = Map.FLAK;
     }

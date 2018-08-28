@@ -28,6 +28,7 @@ class MobileAA extends PlayerAsset {
         this.speed = 0.2;
         this.line_of_sight = 500;
         this.timeToFire = 0;
+        this.flyingTime = 0;
         this.reloadTime = 5000;
         this.target = null;
         this.setRoutine(Routines.idle());

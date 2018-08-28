@@ -44,8 +44,8 @@ module.exports = function(io, client) {
         //
         // }
         const connectedData = { gameId: clientsGame.gameId , numUsers: clientsGame.playerCount, username : client.username };
-        let newBuff = Buffer.from(JSON.stringify(connectedData));
-        client.emit('game connected', newBuff);
+        
+        client.emit('game connected', connectedData);
         io.emit('new message', {username: 'game', message: '' + client.username + ' joined, total players: ' + numUsers});
     });
 

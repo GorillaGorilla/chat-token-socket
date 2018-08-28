@@ -66,35 +66,7 @@ hospitals.forEach(function(poi){
 });
 
 exports.create = function(id, socketHandler, dbHandler){
-    var socketHandler = socketHandler || {
-            players: {},
-            addPlayer : function(player){
-                this.players[player.username] = player;
-            },
-            sendMessages: function(msg){
-                var self = this;
-                for (var playerId in self.players){
-                    debug('player', playerId);
-                    self.emit(playerId, 'new message', msg);  //^^1
-                }
-            },
-            sendGameState: function(msg){
-                var self = this;
-                for (var playername in self.players){
-                    debug('player', playername);
-                    self.emit(playername, 'gameState', msg);  //^^1
-                }
-            },
-            emit :function(name, event, msg){
-                let newBuff = Buffer.from(JSON.stringify(msg));
-                this.players[name].emit(event, newBuff);
-            },
-            removePlayer : function(player){
-                delete this.players[player.username];
-            }
-
-
-        };
+    var socketHandler = socketHandler || require('./socketHandler');
     var setPlayerEntityDisconnectTime = function(username){
         var playerEntity = null;
         this.playerEntities.forEach(function(ent){

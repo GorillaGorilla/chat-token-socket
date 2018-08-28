@@ -33,6 +33,7 @@ module.exports = function(game, nextState){
         entityState.money = Math.floor(entityState.money);
         entityState.score = Math.floor(entityState.score);
         // console.log('entity clone', entityState);
+        entityState.disconnectedAt = entityState.disconnectedAt || 'none';
         proj.metresToMaps(entityState);
         playerStates.push(entityState);
 
